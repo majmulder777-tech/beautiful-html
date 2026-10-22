@@ -1,16 +1,18 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" style="scroll-behavior: smooth;">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Чистая Квинта — Harmonices Mundi (Автономное издание)</title>
+  <title>Чистая Квинта — Harmonices Mundi (Полное автономное издание)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #fbf9f5;
-      --surface: #f3efe6;
+      --surface: #f4efe6;
+      --surface-elev: #ebe5d8;
+      --canvas-bg: #f7f3eb;
       --fg: #1c1917;
       --muted: #68625b;
       --border: rgba(28, 25, 23, 0.16);
@@ -21,8 +23,10 @@
     body.dark {
       --bg: #0c0b0a;
       --surface: #141210;
+      --surface-elev: #1c1916;
+      --canvas-bg: #0e0d0b;
       --fg: #f5f2eb;
-      --muted: #9e9689;
+      --muted: #a39b8b;
       --border: rgba(214, 206, 190, 0.16);
       --accent: #d4a853;
       --btn-bg: #d4a853;
@@ -34,28 +38,41 @@
       color: var(--fg);
       font-family: 'Lora', Georgia, serif;
       min-height: 100vh;
+      line-height: 1.6;
       transition: background 0.2s, color 0.2s;
     }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+    .container { max-width: 1240px; margin: 0 auto; padding: 0 1.5rem; }
     header {
       border-bottom: 1px solid var(--border);
-      padding: 1rem 0;
+      padding: 0.95rem 0;
       position: sticky;
       top: 0;
       background: var(--bg);
-      z-index: 10;
+      z-index: 30;
     }
     .nav-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-    .brand { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 600; text-decoration: none; color: var(--fg); }
-    .kicker { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
-    h1, h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; line-height: 1.1; }
-    h1 { font-size: clamp(2.2rem, 4vw, 3.4rem); margin-bottom: 0.75rem; }
-    h2 { font-size: 1.8rem; margin-bottom: 0.75rem; }
-    .grid { display: grid; grid-template-columns: 1fr; gap: 2rem; margin: 2rem 0 3.5rem; }
-    @media (min-width: 960px) { .grid { grid-template-columns: 7fr 5fr; } }
-    .panel { border: 1px solid var(--border); background: var(--surface); padding: 1.5rem; border-radius: 2px; }
-    canvas { width: 100%; max-width: 540px; aspect-ratio: 1/1; display: block; margin: 0 auto; border: 1px solid var(--border); cursor: grab; }
-    .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0.5rem; margin-bottom: 1.25rem; }
+    .brand { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 600; text-decoration: none; color: var(--fg); white-space: nowrap; }
+    nav.chapters { display: flex; gap: 1.5rem; flex-wrap: wrap; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.78rem; font-weight: 500; }
+    nav.chapters a { color: var(--fg); text-decoration: none; opacity: 0.8; white-space: nowrap; }
+    nav.chapters a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+    .section-block { padding: 3.5rem 0; border-bottom: 1px solid var(--border); }
+    .section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
+    .kicker { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.45rem; }
+    h1, h2, h3, h4 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; line-height: 1.12; }
+    h1 { font-size: clamp(2.25rem, 4vw, 3.4rem); }
+    h2 { font-size: clamp(1.9rem, 3vw, 2.65rem); }
+    h3 { font-size: 1.5rem; margin-bottom: 0.75rem; }
+    .lead { color: var(--muted); max-width: 46ch; font-size: 0.95rem; }
+    .grid-12 { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+    @media (min-width: 960px) {
+      .grid-7-5 { grid-template-columns: 7fr 5fr; }
+      .grid-8-4 { grid-template-columns: 8fr 4fr; }
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+    .panel { border: 1px solid var(--border); background: var(--surface); padding: 1.5rem; border-radius: 2px; display: flex; flex-direction: column; justify-content: space-between; }
+    canvas.square-stage { width: 100%; max-width: 520px; aspect-ratio: 1/1; display: block; margin: 0 auto; border: 1px solid var(--border); background: var(--canvas-bg); cursor: grab; }
+    canvas.wave-stage { width: 100%; height: 240px; display: block; border: 1px solid var(--border); background: var(--canvas-bg); cursor: pointer; }
+    .btn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 0.5rem; margin-bottom: 1.25rem; }
     button {
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 0.75rem;
@@ -66,90 +83,313 @@
       color: var(--fg);
       cursor: pointer;
       border-radius: 2px;
+      transition: opacity 0.15s, background 0.15s;
     }
+    button:hover { opacity: 0.88; }
     button.primary, button.active { background: var(--btn-bg); color: var(--btn-fg); border-color: var(--btn-bg); }
-    .slider-row { margin-bottom: 0.9rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.75rem; }
-    .slider-label { display: flex; justify-content: space-between; margin-bottom: 0.3rem; }
+    .slider-row { margin-bottom: 0.85rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.75rem; }
+    .slider-label { display: flex; justify-content: space-between; margin-bottom: 0.25rem; }
     .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+    .sans { font-family: 'Plus Jakarta Sans', sans-serif; }
     input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
-    footer { border-top: 1px solid var(--border); padding: 2rem 0; font-size: 0.75rem; color: var(--muted); font-family: 'Plus Jakarta Sans', sans-serif; margin-top: 3rem; }
+    input[type="text"] {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+      border-radius: 2px;
+    }
+    .dropcap::first-letter {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 3.3rem;
+      font-weight: 600;
+      float: left;
+      margin-right: 0.75rem;
+      line-height: 0.9;
+      margin-top: 0.15rem;
+    }
+    .metrics-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; padding-top: 1rem; margin-top: 1rem; border-top: 1px solid var(--border); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.75rem; }
+    @media (min-width: 640px) { .metrics-strip { grid-template-columns: repeat(4, 1fr); } }
+    .plate-svg-box { aspect-ratio: 4/3; border: 1px solid var(--border); background: var(--canvas-bg); padding: 1rem; margin: 1rem 0; display: flex; align-items: center; justify-content: center; }
+    dl.meta-dl { border-top: 1px solid var(--border); margin-top: 1rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.75rem; }
+    dl.meta-dl div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.45rem 0; border-bottom: 1px solid var(--border); }
+    footer { padding: 2.5rem 0; font-size: 0.75rem; color: var(--muted); font-family: 'Plus Jakarta Sans', sans-serif; }
   </style>
 </head>
-<body class="dark">
+<body>
   <header>
     <div class="container nav-row">
-      <a href="#" class="brand">Harmonices Mundi</a>
+      <a href="#harmonograph" class="brand">Harmonices Mundi</a>
+      <nav class="chapters" aria-label="Навигация по главам">
+        <a href="#harmonograph">01. Гармониограф</a>
+        <a href="#phyllotaxis">02. Филлотаксис</a>
+        <a href="#monochord">03. Монохорд Пифагора</a>
+        <a href="#archive">04. Архивный каталог</a>
+      </nav>
       <div style="display:flex; gap:0.5rem; align-items:center;">
-        <button id="themeBtn">Светлая / Тёмная тема</button>
+        <button id="themeBtn">Пергамент / Обсидиан</button>
         <button id="soundBtn" class="primary">Звучание сфер</button>
       </div>
     </div>
   </header>
 
-  <main class="container" style="padding-top: 2rem;">
-    <div class="kicker">АВТОНОМНАЯ МУЗЕЙНАЯ МОНОГРАФИЯ · РОТАЦИОННЫЙ ГАРМОНИОГРАФ</div>
-    <h1 id="pageTitle">Чистая Квинта</h1>
-    <p style="color: var(--muted); max-width: 65ch; line-height: 1.65;">
-      Перетаскивайте холст курсором для смещения фазы или переключайте канонические интервалы. Этот файл полностью автономен и работает без подключения к серверу.
-    </p>
-
-    <div class="grid">
-      <div class="panel" style="display:flex; flex-direction:column; justify-content:space-between;">
-        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--muted); margin-bottom:0.75rem;" class="mono">
-          <span>Интерактивный стол гравировки 1:1</span>
-          <span id="eqReadout"></span>
+  <main class="container">
+    <!-- ГЛАВА 01: ГАРМОНИОГРАФ -->
+    <section id="harmonograph" class="section-block">
+      <div class="section-head">
+        <div>
+          <div class="kicker">Глава 01 · Ротационный Гармониограф · Механика Колебаний</div>
+          <h1 id="pageTitle">Архитектура Света, Звука и Числа</h1>
         </div>
-        <canvas id="stage" width="900" height="900"></canvas>
-        <div style="display:flex; gap:0.5rem; margin-top:1rem; justify-content:flex-end;">
-          <button id="pauseBtn">Пауза / Пуск</button>
-          <button id="svgBtn">Скачать SVG</button>
-        </div>
+        <p class="lead">
+          Когда три связанных маятника колеблются в кратных отношениях частот, перо оставляет на листе видимый слепок музыкального аккорда. Перетаскивайте гравюру курсором для смещения фазы.
+        </p>
       </div>
 
-      <div class="panel">
-        <h2>Канонические интервалы</h2>
-        <div id="presetsContainer" class="presets"></div>
+      <div class="grid-12 grid-7-5">
+        <div class="panel">
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--muted); margin-bottom:0.75rem;" class="sans">
+            <span>Интерактивный стол гравировки · Масштаб 1:1</span>
+            <span id="symReadout" class="mono"></span>
+          </div>
+          <canvas id="stage" class="square-stage" width="880" height="880"></canvas>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-top:1rem; padding-top:0.75rem; border-top:1px solid var(--border);">
+            <span id="eqReadout" class="mono" style="font-size:0.72rem; color:var(--muted);"></span>
+            <div style="display:flex; gap:0.5rem;">
+              <button id="pauseBtn">Пауза фазы</button>
+              <button id="svgBtn">Экспорт SVG</button>
+            </div>
+          </div>
+        </div>
 
-        <div class="slider-row">
-          <div class="slider-label"><span>Частота маятника X (ω₁)</span><span id="valFreqX" class="mono"></span></div>
-          <input id="inpFreqX" type="range" min="1" max="7" step="0.002" />
-        </div>
-        <div class="slider-row">
-          <div class="slider-label"><span>Частота маятника Y (ω₂)</span><span id="valFreqY" class="mono"></span></div>
-          <input id="inpFreqY" type="range" min="1" max="7" step="0.002" />
-        </div>
-        <div class="slider-row">
-          <div class="slider-label"><span>Ротация стола R (ω₃)</span><span id="valFreqRot" class="mono"></span></div>
-          <input id="inpFreqRot" type="range" min="0.5" max="5" step="0.05" />
-        </div>
-        <div class="slider-row">
-          <div class="slider-label"><span>Фазовый сдвиг Δφ</span><span id="valPhaseX" class="mono"></span></div>
-          <input id="inpPhaseX" type="range" min="0" max="360" step="1" />
-        </div>
-        <div class="slider-row">
-          <div class="slider-label"><span>Затухание δ</span><span id="valDamping" class="mono"></span></div>
-          <input id="inpDamping" type="range" min="0.0004" max="0.0035" step="0.0001" />
+        <div class="panel">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+              <h3>Канонические интервалы</h3>
+              <span class="mono" style="font-size:0.72rem; color:var(--muted);">5 пресетов</span>
+            </div>
+            <div id="presetsContainer" class="btn-grid"></div>
+
+            <div style="border-top:1px solid var(--border); padding-top:1rem;">
+              <div class="slider-row">
+                <div class="slider-label"><span>Частота маятника X (ω<sub>1</sub>)</span><span id="valFreqX" class="mono"></span></div>
+                <input id="inpFreqX" type="range" min="1" max="7" step="0.002" />
+              </div>
+              <div class="slider-row">
+                <div class="slider-label"><span>Частота маятника Y (ω<sub>2</sub>)</span><span id="valFreqY" class="mono"></span></div>
+                <input id="inpFreqY" type="range" min="1" max="7" step="0.002" />
+              </div>
+              <div class="slider-row">
+                <div class="slider-label"><span>Частота ротации стола (ω<sub>3</sub>)</span><span id="valFreqRot" class="mono"></span></div>
+                <input id="inpFreqRot" type="range" min="0.5" max="5" step="0.05" />
+              </div>
+              <div class="slider-row">
+                <div class="slider-label"><span>Фазовый сдвиг Δφ</span><span id="valPhaseX" class="mono"></span></div>
+                <input id="inpPhaseX" type="range" min="0" max="360" step="1" />
+              </div>
+              <div class="slider-row">
+                <div class="slider-label"><span>Затухание δ</span><span id="valDamping" class="mono"></span></div>
+                <input id="inpDamping" type="range" min="0.0004" max="0.0035" step="0.0001" />
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;" class="sans">
+                <span style="font-size:0.75rem;">Направление ротации</span>
+                <div style="display:flex; gap:0.35rem;">
+                  <button id="rotCounterBtn" class="active">Встречное (−)</button>
+                  <button id="rotSameBtn">Попутное (+)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <form id="saveForm" style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--border);">
+            <div class="sans" style="font-size:0.75rem; margin-bottom:0.5rem; font-weight:500;">
+              Запечатлеть текущую фигуру в каталоге (Глава 04)
+            </div>
+            <div style="display:flex; gap:0.5rem;">
+              <input id="saveTitleInput" type="text" placeholder="Название гравюры (напр., Этюд Квинты)" />
+              <button type="submit" class="primary">Сохранить гравюру</button>
+            </div>
+            <div id="saveStatus" class="sans" style="font-size:0.72rem; color:var(--accent); margin-top:0.4rem;"></div>
+          </form>
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- ГЛАВА 02: БОТАНИЧЕСКИЙ ФИЛЛОТАКСИС -->
+    <section id="phyllotaxis" class="section-block">
+      <div class="grid-12 grid-8-4">
+        <div>
+          <div class="kicker">Глава 02 · Ботанический Морфогенез · Спираль Фогеля</div>
+          <h2 style="margin-bottom:1.25rem;">Почему подсолнух и сосновая шишка знают теорию чисел</h2>
+          <p class="dropcap" style="margin-bottom:1rem; opacity:0.9;">
+            Представьте меристему растущего цветка, которая рождает по одному новому семени в самом центре и выталкивает предыдущие к краю. Если поворачивать каждое следующее семя на рациональную долю круга — например, на 144° (ровно две пятых оборота) — семена выстроятся в пять жёстких прямых лучей, оставив между ними зияющие пустоты.
+          </p>
+          <p style="margin-bottom:1.75rem; opacity:0.9;">
+            Чтобы заполнить диск без единого зазора при любом радиусе роста, природе необходимо <em>самое иррациональное из всех чисел</em> — золотое сечение φ = (1 + √5) / 2. Деление окружности в золотой пропорции даёт золотой угол <strong>137.50776°</strong>.
+          </p>
+
+          <div class="panel">
+            <div class="grid-12 grid-7-5" style="align-items:center;">
+              <div style="text-align:center;">
+                <svg id="phyllotaxisSvg" viewBox="-200 -200 400 400" style="width:100%; max-width:360px; aspect-ratio:1/1; margin:0 auto; display:block;"></svg>
+                <div id="phylloFormula" class="mono" style="font-size:0.72rem; color:var(--muted); margin-top:0.5rem;"></div>
+              </div>
+              <div>
+                <h3>Эксперимент с углом расхождения</h3>
+                <div id="phylloPresets" style="display:flex; flex-direction:column; gap:0.45rem; margin-bottom:1rem;"></div>
+                <div class="slider-row">
+                  <div class="slider-label"><span>Угол расхождения φ</span><span id="valPhylloAngle" class="mono"></span></div>
+                  <input id="inpPhylloAngle" type="range" min="136.5" max="144.5" step="0.002" value="137.5078" />
+                </div>
+                <div class="slider-row">
+                  <div class="slider-label"><span>Число семян N</span><span id="valPhylloCount" class="mono"></span></div>
+                  <input id="inpPhylloCount" type="range" min="100" max="750" step="10" value="420" />
+                </div>
+                <button id="toggleFibBtn" style="width:100%; margin-bottom:0.9rem;">Скрыть / показать парастихии (21 и 34)</button>
+                <div style="border:1px solid var(--border); padding:0.75rem; font-size:0.75rem;" class="sans">
+                  <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                    <span style="color:var(--muted);">Режим решётки:</span>
+                    <strong id="phylloRegime"></strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between;">
+                    <span style="color:var(--muted);">Равномерность упаковки:</span>
+                    <strong id="phylloEff" class="mono"></strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside style="padding-top:1.5rem;">
+          <div style="border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:1.5rem 0; margin-bottom:1.75rem;">
+            <blockquote style="font-family:'Cormorant Garamond',Georgia,serif; font-style:italic; font-size:1.55rem; line-height:1.3; margin-bottom:0.75rem;">
+              «Геометрия существовала до сотворения вещей; она совечна Разуму и дала образы для устроения видимого мира».
+            </blockquote>
+            <div class="kicker" style="margin:0;">Иоганн Кеплер · Harmonices Mundi, Книга IV (1619)</div>
+          </div>
+          <div class="kicker">Маргиналия I · Цепная дробь</div>
+          <p style="font-size:0.82rem; color:var(--muted); margin-bottom:0.75rem;">
+            Золотое сечение выражается бесконечной цепной дробью из одних единиц:
+          </p>
+          <div class="mono" style="border:1px solid var(--border); padding:0.75rem; font-size:0.75rem; margin-bottom:0.75rem;">
+            φ = 1 + 1 / (1 + 1 / (1 + 1 / (1 + …))) = 1.6180339887…
+          </div>
+          <p style="font-size:0.82rem; color:var(--muted);">
+            Подходящие дроби 1/1, 2/1, 3/2, 5/3, 8/5, 13/8, 21/13, 34/21 сходятся медленнее любых других чисел во Вселенной — защищая растущий цветок от резонансного слипания лепестков.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ГЛАВА 03: АКУСТИЧЕСКИЙ МОНОХОРД ПИФАГОРА -->
+    <section id="monochord" class="section-block">
+      <div class="section-head">
+        <div>
+          <div class="kicker">Глава 03 · Акустический Монохорд Пифагора · Стоячие Волны</div>
+          <h2>Число как слышимая форма натянутой струны</h2>
+        </div>
+        <p class="lead">
+          Выберите интервал или коснитесь струны: монохорд воспроизведёт двуголосный консонанс и покажет неподвижные узлы стоячей волны.
+        </p>
+      </div>
+
+      <div class="grid-12 grid-7-5">
+        <div class="panel">
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--muted); margin-bottom:0.75rem;" class="sans">
+            <span id="monoWaveLabel">Стоячие полуволны</span>
+            <span id="monoNodesLabel" class="mono"></span>
+          </div>
+          <canvas id="monochordCanvas" class="wave-stage" width="760" height="260"></canvas>
+          <div class="metrics-strip">
+            <div><div style="color:var(--muted);">Пропорция длин</div><div id="monoRatio" class="mono" style="font-size:1rem; font-weight:600;"></div></div>
+            <div><div style="color:var(--muted);">Акустические центы</div><div id="monoCents" class="mono" style="font-size:1rem; font-weight:600;"></div></div>
+            <div><div style="color:var(--muted);">Gradus Suavitatis</div><div id="monoEuler" class="mono" style="font-size:1rem; font-weight:600;"></div></div>
+            <div><div style="color:var(--muted);">Частота (A3 = 220 Гц)</div><div id="monoFreq" class="mono" style="font-size:1rem; font-weight:600;"></div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div>
+            <h3>Лестница консонансов</h3>
+            <div id="monochordButtons" class="btn-grid"></div>
+            <p id="monoComment" style="font-size:0.9rem; color:var(--muted); border-top:1px solid var(--border); padding-top:1rem;"></p>
+          </div>
+          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--border);">
+            <button id="pluckAgainBtn">Прослушать интервал</button>
+            <button id="applyMonoToHarmBtn" class="primary">Перенести пропорцию в гармониограф</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ГЛАВА 04: АРХИВНЫЙ КАТАЛОГ ФОРМ -->
+    <section id="archive" class="section-block" style="border-bottom:none;">
+      <div class="section-head">
+        <div>
+          <div class="kicker">Глава 04 · Музейный Фонд · Инвентарный Каталог Форм</div>
+          <h2>Атлас резонансов и сохранённые гравюры</h2>
+        </div>
+        <div id="archiveTabs" style="display:flex; gap:0.4rem; flex-wrap:wrap;"></div>
+      </div>
+
+      <div id="savedArchiveSection" style="margin-bottom:2.5rem; display:none;">
+        <h3 style="margin-bottom:1rem;">Оттиски, созданные в вашем сеансе</h3>
+        <div id="savedArchiveGrid" class="grid-12 grid-2"></div>
+      </div>
+
+      <div id="curatedArchiveGrid" class="grid-12 grid-2"></div>
+    </section>
   </main>
 
   <footer>
-    <div class="container" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
-      <span>Harmonices Mundi · Архитектура Света, Звука и Числа</span>
-      <span class="mono">Автономная HTML-версия</span>
+    <div class="container" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem; border-top:1px solid var(--border); padding-top:2rem;">
+      <span>Harmonices Mundi · Полная автономная музейная монография (Главы 01–04)</span>
+      <a href="#harmonograph" style="color:var(--fg);">Наверх к гармониографу ↑</a>
     </div>
   </footer>
 
   <script>
     const presets = [{"id":"fifth","name":"Чистая Квинта","latinSubtitle":"Diapente · 2 : 3","ratioLabel":"2 : 3","description":"Совершенный консонанс пифагорейской школы. Три колебания маятника X приходятся ровно на два колебания маятника Y, рождая корону с пятью точками инверсии.","params":{"freqX":3.002,"freqY":2,"freqRot":1,"phaseX":90,"phaseY":0,"damping":0.0014,"rotAmplitude":0.42,"counterRotate":true}},{"id":"octave","name":"Октава с Розеткой","latinSubtitle":"Diapason · 1 : 2","ratioLabel":"1 : 2","description":"Фундаментальное удвоение частоты. При встречном вращении третьего маятника параболическая восьмёрка Лиссажу раскрывается в трёхлепестковую гравюру.","params":{"freqX":2.003,"freqY":1,"freqRot":1,"phaseX":45,"phaseY":90,"damping":0.0012,"rotAmplitude":0.48,"counterRotate":true}},{"id":"fourth","name":"Чистая Кварта","latinSubtitle":"Diatessaron · 3 : 4","ratioLabel":"3 : 4","description":"Геометрический диалог тройки и четвёрки. Тонкая расстройка на 0.003 Гц создаёт медленное вращение фазы и объёмный муаровый рельеф.","params":{"freqX":4.003,"freqY":3,"freqRot":2,"phaseX":60,"phaseY":0,"damping":0.0015,"rotAmplitude":0.36,"counterRotate":false}},{"id":"golden","name":"Золотая Гармония","latinSubtitle":"Sectio Aurea · φ : 1","ratioLabel":"1.618 : 1","description":"Иррациональное отношение золотого сечения φ = (1 + √5)/2. Траектория никогда не замыкается полностью, заполняя пространство квазипериодической тканью света.","params":{"freqX":1.618,"freqY":1,"freqRot":2.618,"phaseX":120,"phaseY":30,"damping":0.0011,"rotAmplitude":0.4,"counterRotate":true}},{"id":"hexad","name":"Звезда Кеплера","latinSubtitle":"Hexas Harmonica · 5 : 6","ratioLabel":"5 : 6","description":"Малая терция в сочетании с противофазной ротацией образует одиннадцатилучевую небесную мандалу, напоминающую орбитальные резонансы Венеры и Земли.","params":{"freqX":5.002,"freqY":6,"freqRot":1,"phaseX":90,"phaseY":180,"damping":0.0016,"rotAmplitude":0.45,"counterRotate":true}}];
     let params = {"freqX":3.002,"freqY":2,"freqRot":1,"phaseX":90,"phaseY":0,"damping":0.0014,"rotAmplitude":0.42,"counterRotate":true};
+    let savedEngravings = [];
     let isPlaying = true;
     let animPhase = 0;
     let audioCtx = null;
     let oscs = [];
     let isSound = false;
 
+    function ensureAudio() {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!audioCtx && AC) audioCtx = new AC();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function eulerGradus(p, q) {
+      const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+      const cp = Math.max(1, Math.round(Math.abs(p)));
+      const cq = Math.max(1, Math.round(Math.abs(q)));
+      const g = gcd(cp, cq);
+      let n = (cp / g) * (cq / g);
+      let sum = 1, d = 2;
+      while (d * d <= n) {
+        while (n % d === 0) { sum += d - 1; n = Math.floor(n / d); }
+        d++;
+      }
+      if (n > 1) sum += n - 1;
+      return sum;
+    }
+
+    function formatEq(p) {
+      const sign = p.counterRotate ? '−' : '+';
+      return 'x(t) = e^(−' + p.damping.toFixed(4) + 't)·[sin(' + p.freqX.toFixed(3) + 't + ' + Math.round(p.phaseX) + '°) ' + sign + ' ' + p.rotAmplitude.toFixed(2) + '·cos(' + p.freqRot.toFixed(2) + 't)]';
+    }
+
+    // --- CHAPTER 01: HARMONOGRAPH ---
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d');
 
@@ -163,8 +403,14 @@
       document.getElementById('inpPhaseX').value = params.phaseX;
       document.getElementById('valPhaseX').textContent = Math.round(params.phaseX) + '°';
       document.getElementById('inpDamping').value = params.damping;
-      document.getElementById('valDamping').textContent = params.damping.toFixed(4) + ' с⁻¹';
-      document.getElementById('eqReadout').textContent = params.freqX.toFixed(2) + ' : ' + params.freqY.toFixed(2);
+      document.getElementById('valDamping').innerHTML = params.damping.toFixed(4) + ' с<sup>−1</sup>';
+      document.getElementById('eqReadout').textContent = formatEq(params);
+      const primary = Math.round((params.freqX + params.freqY) / 2);
+      const rot = Math.max(1, Math.round(params.freqRot));
+      const lobes = params.counterRotate ? primary + rot : Math.max(1, Math.abs(primary - rot));
+      document.getElementById('symReadout').textContent = 'Лепестков: ' + lobes + ' · Γ = ' + eulerGradus(params.freqX, params.freqY);
+      document.getElementById('rotCounterBtn').className = params.counterRotate ? 'active' : '';
+      document.getElementById('rotSameBtn').className = !params.counterRotate ? 'active' : '';
       if (isSound && oscs.length === 3 && audioCtx) {
         oscs[0].frequency.setTargetAtTime(110 * params.freqY, audioCtx.currentTime, 0.08);
         oscs[1].frequency.setTargetAtTime(110 * params.freqX, audioCtx.currentTime, 0.08);
@@ -178,22 +424,35 @@
       btn.textContent = p.name + ' (' + p.ratioLabel + ')';
       btn.onclick = () => {
         params = Object.assign({}, p.params);
-        document.getElementById('pageTitle').textContent = p.name;
         syncUI();
       };
       presetsEl.appendChild(btn);
     });
 
-    ['FreqX', 'FreqY', 'FreqRot', 'PhaseX', 'Damping'].forEach((key) => {
-      const prop = 'freqX' === 'freq' + key.slice(4) ? 'freqX' : key.charAt(0).toLowerCase() + key.slice(1);
-      document.getElementById('inp' + key).addEventListener('input', (e) => {
+    [
+      ['inpFreqX', 'freqX'],
+      ['inpFreqY', 'freqY'],
+      ['inpFreqRot', 'freqRot'],
+      ['inpPhaseX', 'phaseX'],
+      ['inpDamping', 'damping']
+    ].forEach(([id, prop]) => {
+      document.getElementById(id).addEventListener('input', (e) => {
         params[prop] = parseFloat(e.target.value);
         syncUI();
       });
     });
 
-    document.getElementById('themeBtn').onclick = () => document.body.classList.toggle('dark');
-    document.getElementById('pauseBtn').onclick = () => { isPlaying = !isPlaying; };
+    document.getElementById('rotCounterBtn').onclick = () => { params.counterRotate = true; syncUI(); };
+    document.getElementById('rotSameBtn').onclick = () => { params.counterRotate = false; syncUI(); };
+    document.getElementById('themeBtn').onclick = () => {
+      document.body.classList.toggle('dark');
+      renderPhyllotaxis();
+      renderArchive();
+    };
+    document.getElementById('pauseBtn').onclick = () => {
+      isPlaying = !isPlaying;
+      document.getElementById('pauseBtn').textContent = isPlaying ? 'Пауза фазы' : 'Пуск фазы';
+    };
     document.getElementById('soundBtn').onclick = () => {
       if (isSound) {
         oscs.forEach(o => { try { o.stop(); } catch {} });
@@ -202,14 +461,13 @@
         document.getElementById('soundBtn').textContent = 'Звучание сфер';
         return;
       }
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!audioCtx) audioCtx = new AC();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const master = audioCtx.createGain();
+      const ac = ensureAudio();
+      if (!ac) return;
+      const master = ac.createGain();
       master.gain.value = 0.08;
-      master.connect(audioCtx.destination);
+      master.connect(ac.destination);
       oscs = [110 * params.freqY, 110 * params.freqX, 110 * params.freqRot].map((f) => {
-        const o = audioCtx.createOscillator();
+        const o = ac.createOscillator();
         o.type = 'sine';
         o.frequency.value = f;
         o.connect(master);
@@ -220,24 +478,48 @@
       document.getElementById('soundBtn').textContent = 'Акустика: Вкл';
     };
 
-    document.getElementById('svgBtn').onclick = () => {
+    function buildSvgPathFromParams(p, steps, scale, center) {
       const pts = [];
-      for (let i = 0; i <= 2600; i++) {
-        const t = i * 0.032;
-        const env = Math.exp(-params.damping * t);
-        const px = params.phaseX * Math.PI / 180 + animPhase;
-        const py = params.phaseY * Math.PI / 180;
-        const lat = 1 - params.rotAmplitude;
-        const sign = params.counterRotate ? -1 : 1;
-        const x = 400 + ((lat * Math.sin(params.freqX * t + px) + params.rotAmplitude * Math.cos(params.freqRot * t)) * env) * 360;
-        const y = 400 + ((lat * Math.sin(params.freqY * t + py) + params.rotAmplitude * sign * Math.sin(params.freqRot * t)) * env) * 360;
+      for (let i = 0; i <= steps; i++) {
+        const t = i * 0.035;
+        const env = Math.exp(-p.damping * t);
+        const px = p.phaseX * Math.PI / 180;
+        const py = p.phaseY * Math.PI / 180;
+        const lat = 1 - p.rotAmplitude;
+        const sign = p.counterRotate ? -1 : 1;
+        const x = center + ((lat * Math.sin(p.freqX * t + px) + p.rotAmplitude * Math.cos(p.freqRot * t)) * env) * scale;
+        const y = center + ((lat * Math.sin(p.freqY * t + py) + p.rotAmplitude * sign * Math.sin(p.freqRot * t)) * env) * scale;
         pts.push((i === 0 ? 'M ' : 'L ') + x.toFixed(2) + ' ' + y.toFixed(2));
       }
-      const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><rect width="800" height="800" fill="#0c0b0a"/><path d="' + pts.join(' ') + '" fill="none" stroke="#d4a853" stroke-width="1.2"/></svg>';
+      return pts.join(' ');
+    }
+
+    document.getElementById('svgBtn').onclick = () => {
+      const pathStr = buildSvgPathFromParams(params, 2600, 360, 400);
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><rect width="800" height="800" fill="#0c0b0a"/><path d="' + pathStr + '" fill="none" stroke="#d4a853" stroke-width="1.2"/></svg>';
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
       a.download = 'harmonices-mundi.svg';
       a.click();
+    };
+
+    document.getElementById('saveForm').onsubmit = (e) => {
+      e.preventDefault();
+      const input = document.getElementById('saveTitleInput');
+      const titleVal = input.value.trim() || ('Гравюра ' + params.freqX.toFixed(2) + ':' + params.freqY.toFixed(2));
+      savedEngravings.unshift({
+        id: 'u-' + Date.now(),
+        title: titleVal,
+        accessionNumber: 'ACC. 2026.U0' + (savedEngravings.length + 1),
+        ratioLabel: params.freqX.toFixed(2) + ' : ' + params.freqY.toFixed(2),
+        equation: formatEq(params),
+        createdAt: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+        params: Object.assign({}, params),
+        svgPath: buildSvgPathFromParams(params, 1600, 175, 200)
+      });
+      input.value = '';
+      document.getElementById('saveStatus').textContent = 'Сохранено в Главу 04: «' + titleVal + '»';
+      renderArchive();
     };
 
     let dragging = false, lastX = 0;
@@ -251,13 +533,16 @@
       syncUI();
     };
 
-    function render() {
+    function renderHarmonograph() {
       const dark = document.body.classList.contains('dark');
       ctx.fillStyle = dark ? '#0e0d0b' : '#f7f3eb';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      const cx = canvas.width / 2, cy = canvas.height / 2, scale = canvas.width * 0.43;
+      const cx = canvas.width / 2, cy = canvas.height / 2, scale = canvas.width * 0.425;
+      ctx.strokeStyle = dark ? 'rgba(214,206,190,0.08)' : 'rgba(28,25,23,0.07)';
+      ctx.lineWidth = 1;
+      [0.35, 0.7, 1.0].forEach(r => { ctx.beginPath(); ctx.arc(cx, cy, scale * r, 0, Math.PI * 2); ctx.stroke(); });
       ctx.beginPath();
-      const steps = 3600, dt = 0.032;
+      const steps = 3400, dt = 0.032;
       for (let i = 0; i <= steps; i++) {
         const t = i * dt;
         const env = Math.exp(-params.damping * t);
@@ -270,14 +555,337 @@
         if (i === 0) ctx.moveTo(cx + x * scale, cy + y * scale);
         else ctx.lineTo(cx + x * scale, cy + y * scale);
       }
-      ctx.strokeStyle = dark ? 'rgba(212, 168, 83, 0.8)' : 'rgba(28, 25, 23, 0.78)';
-      ctx.lineWidth = 1.1;
+      ctx.strokeStyle = dark ? 'rgba(245, 235, 214, 0.82)' : 'rgba(28, 25, 23, 0.78)';
+      ctx.lineWidth = 1.08;
       ctx.stroke();
       if (isPlaying && !dragging) animPhase += 0.004;
-      requestAnimationFrame(render);
+      requestAnimationFrame(renderHarmonograph);
     }
+
+    // --- CHAPTER 02: PHYLLOTAXIS ---
+    const GOLDEN_ANGLE = 137.50776405;
+    let phylloAngle = GOLDEN_ANGLE;
+    let phylloCount = 420;
+    let highlightFib = true;
+
+    const phylloPresetsData = [
+      { label: 'Золотой угол φ (137.5078°)', val: GOLDEN_ANGLE },
+      { label: 'Субоптимум (137.3000°)', val: 137.3 },
+      { label: 'Сверхзолотой (137.6500°)', val: 137.65 },
+      { label: 'Рациональная дробь 2/5 (144.0000°)', val: 144.0 }
+    ];
+    const phylloPresetsEl = document.getElementById('phylloPresets');
+    phylloPresetsData.forEach(item => {
+      const b = document.createElement('button');
+      b.style.textAlign = 'left';
+      b.textContent = item.label;
+      b.onclick = () => {
+        phylloAngle = item.val;
+        document.getElementById('inpPhylloAngle').value = phylloAngle;
+        renderPhyllotaxis();
+      };
+      phylloPresetsEl.appendChild(b);
+    });
+
+    document.getElementById('inpPhylloAngle').oninput = (e) => {
+      phylloAngle = parseFloat(e.target.value);
+      renderPhyllotaxis();
+    };
+    document.getElementById('inpPhylloCount').oninput = (e) => {
+      phylloCount = parseInt(e.target.value, 10);
+      renderPhyllotaxis();
+    };
+    document.getElementById('toggleFibBtn').onclick = () => {
+      highlightFib = !highlightFib;
+      renderPhyllotaxis();
+    };
+
+    function renderPhyllotaxis() {
+      const dark = document.body.classList.contains('dark');
+      const primary = dark ? '#d4a853' : '#9a3412';
+      const base = dark ? '#e7e0d3' : '#292524';
+      const svg = document.getElementById('phyllotaxisSvg');
+      const rad = phylloAngle * Math.PI / 180;
+      const c = 175 / Math.sqrt(phylloCount);
+      let circles = '<circle cx="0" cy="0" r="184" fill="none" stroke="' + (dark ? 'rgba(214,206,190,0.14)' : 'rgba(28,25,23,0.12)') + '" stroke-width="1"/>';
+      for (let n = 1; n <= phylloCount; n++) {
+        const r = c * Math.sqrt(n);
+        const th = n * rad;
+        const x = (r * Math.cos(th)).toFixed(2);
+        const y = (r * Math.sin(th)).toFixed(2);
+        const isFib = highlightFib && (n % 21 === 0 || n % 34 === 0);
+        const sz = (1.6 + (n / phylloCount) * 2.4) * (isFib ? 1.28 : 1);
+        circles += '<circle cx="' + x + '" cy="' + y + '" r="' + sz.toFixed(2) + '" fill="' + (isFib ? primary : base) + '" fill-opacity="' + (isFib ? '0.95' : '0.62') + '"/>';
+      }
+      svg.innerHTML = circles;
+      document.getElementById('valPhylloAngle').textContent = phylloAngle.toFixed(4) + '°';
+      document.getElementById('valPhylloCount').textContent = phylloCount + ' шт.';
+      document.getElementById('phylloFormula').textContent = 'r(n) = c·√n · θ(n) = n · ' + phylloAngle.toFixed(4) + '° · Спирали: (21, 34)';
+      const delta = Math.abs(phylloAngle - GOLDEN_ANGLE);
+      const eff = Math.min(99.9, Math.max(12.0, 100 * Math.exp(-Math.pow(delta / 0.45, 2)) * 0.72 + 28 * Math.exp(-Math.pow(delta / 4.0, 2))));
+      document.getElementById('phylloEff').textContent = eff.toFixed(1) + '%';
+      document.getElementById('phylloRegime').textContent = delta <= 0.08 ? 'Оптимум Фибоначчи' : delta <= 0.6 ? 'Переходная решётка' : 'Радиальные лучи';
+    }
+
+    // --- CHAPTER 03: PYTHAGOREAN MONOCHORD ---
+    const monoIntervals = [
+      { id: '1:1', name: 'Прима (Унисон)', p: 1, q: 1, comment: 'Абсолютное тождество тона. Струна колеблется целиком как единая полуволна без внутренних узлов покоя.' },
+      { id: '2:1', name: 'Чистая Октава', p: 2, q: 1, comment: 'Деление струны ровно пополам рождает узел в центре (L/2). Частота удваивается, сохраняя прозрачность основного тона.' },
+      { id: '3:2', name: 'Чистая Квинта', p: 3, q: 2, comment: 'Опора античного строя: звучащие две трети струны образуют три полуволны и два неподвижных гармонических узла.' },
+      { id: '4:3', name: 'Чистая Кварта', p: 4, q: 3, comment: 'Обращение квинты в пределах октавы. Четыре стоячие полуволны делят длину струны на равные четверти.' },
+      { id: '5:4', name: 'Большая Терция', p: 5, q: 4, comment: 'Пятый обертон натурального звукоряда вносит тёплую мажорную светотень Ренессанса (строй Царлино).' },
+      { id: '8:5', name: 'Золотая Секста', p: 8, q: 5, comment: 'Отношение соседних чисел Фибоначчи (8/5 = 1.600) вплотную приближается к золотому сечению φ = 1.618.' }
+    ];
+    let activeMono = monoIntervals[2];
+    let monoEnergy = 0.85;
+    let monoPhase = 0;
+
+    function pluckMono(item, withAudio = true) {
+      activeMono = item;
+      monoEnergy = 1.0;
+      document.getElementById('monoWaveLabel').textContent = 'Стоячие полуволны: верхняя (' + item.q + ') · нижняя (' + item.p + ')';
+      document.getElementById('monoNodesLabel').textContent = 'Узлов покоя: ' + (item.p - 1);
+      document.getElementById('monoRatio').textContent = item.p + ' : ' + item.q;
+      document.getElementById('monoCents').textContent = (Math.round(1200 * Math.log2(item.p / item.q) * 10) / 10) + ' ¢';
+      document.getElementById('monoEuler').textContent = 'Γ = ' + eulerGradus(item.p, item.q);
+      document.getElementById('monoFreq').textContent = Math.round(220 * item.p / item.q) + ' Гц';
+      document.getElementById('monoComment').textContent = item.comment;
+
+      if (!withAudio) return;
+      const ac = ensureAudio();
+      if (!ac) return;
+      const now = ac.currentTime;
+      [220, 220 * (item.p / item.q)].forEach((freq, idx) => {
+        const osc = ac.createOscillator();
+        const g = ac.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+        g.gain.setValueAtTime(0.001, now + idx * 0.06);
+        g.gain.linearRampToValueAtTime(0.14, now + idx * 0.06 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0008, now + idx * 0.06 + 1.7);
+        osc.connect(g);
+        g.connect(ac.destination);
+        osc.start(now + idx * 0.06);
+        osc.stop(now + idx * 0.06 + 1.75);
+      });
+    }
+
+    const monoBtnsEl = document.getElementById('monochordButtons');
+    monoIntervals.forEach(item => {
+      const b = document.createElement('button');
+      b.textContent = item.name + ' (' + item.p + ':' + item.q + ')';
+      b.onclick = () => pluckMono(item, true);
+      monoBtnsEl.appendChild(b);
+    });
+
+    const monoCanvas = document.getElementById('monochordCanvas');
+    const monoCtx = monoCanvas.getContext('2d');
+    monoCanvas.onclick = () => pluckMono(activeMono, true);
+    document.getElementById('pluckAgainBtn').onclick = () => pluckMono(activeMono, true);
+    document.getElementById('applyMonoToHarmBtn').onclick = () => {
+      params.freqX = activeMono.p + 0.002;
+      params.freqY = activeMono.q;
+      syncUI();
+      document.getElementById('harmonograph').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    function renderMonochord() {
+      const dark = document.body.classList.contains('dark');
+      const w = monoCanvas.width, h = monoCanvas.height;
+      monoCtx.fillStyle = dark ? '#0e0d0b' : '#f7f3eb';
+      monoCtx.fillRect(0, 0, w, h);
+      const padX = 48, usableW = w - padX * 2, topY = h * 0.33, botY = h * 0.72;
+      const amp = Math.max(0.16, monoEnergy) * 30;
+      monoCtx.beginPath();
+      for (let i = 0; i <= 200; i++) {
+        const u = i / 200;
+        const x = padX + u * usableW;
+        const y = topY + Math.sin(u * Math.PI * activeMono.q) * Math.cos(monoPhase * activeMono.q) * amp;
+        if (i === 0) monoCtx.moveTo(x, y); else monoCtx.lineTo(x, y);
+      }
+      monoCtx.strokeStyle = dark ? 'rgba(231,224,211,0.75)' : 'rgba(41,37,36,0.75)';
+      monoCtx.lineWidth = 1.5;
+      monoCtx.stroke();
+
+      monoCtx.beginPath();
+      for (let i = 0; i <= 240; i++) {
+        const u = i / 240;
+        const x = padX + u * usableW;
+        const y = botY + Math.sin(u * Math.PI * activeMono.p) * Math.cos(monoPhase * activeMono.p) * amp;
+        if (i === 0) monoCtx.moveTo(x, y); else monoCtx.lineTo(x, y);
+      }
+      monoCtx.strokeStyle = dark ? '#d4a853' : '#9a3412';
+      monoCtx.lineWidth = 2.0;
+      monoCtx.stroke();
+
+      for (let k = 0; k <= activeMono.p; k++) {
+        monoCtx.fillStyle = dark ? '#f5f2eb' : '#1c1917';
+        monoCtx.beginPath();
+        monoCtx.arc(padX + (k / activeMono.p) * usableW, botY, 3.5, 0, Math.PI * 2);
+        monoCtx.fill();
+      }
+      monoPhase += 0.045;
+      if (monoEnergy > 0.22) monoEnergy *= 0.996;
+      requestAnimationFrame(renderMonochord);
+    }
+
+    // --- CHAPTER 04: MUSEUM ARCHIVE ---
+    const curatedPlates = [
+      {
+        acc: 'ACC. 2026.01.A',
+        kind: 'nautilus',
+        title: 'Логарифмическая спираль Nautilus Pompilius',
+        cat: 'Морфогенез',
+        era: 'Трактат Д’Арси Томпсона · 1917',
+        formula: 'r(θ) = a · e^(b·θ), b = ln(φ) / (π/2)',
+        dim: '42.0 × 42.0 см · Медная гравюра',
+        desc: 'Каждая новая камера раковины наутилуса подобна предыдущей с коэффициентом золотого сечения φ. Самоподобие позволяет организму расти, не меняя гидродинамической формы.',
+        params: { freqX: 1.618, freqY: 1.0, freqRot: 2.618, phaseX: 120, phaseY: 30, damping: 0.0011, rotAmplitude: 0.4, counterRotate: true }
+      },
+      {
+        acc: 'ACC. 2026.02.B',
+        kind: 'chladni',
+        title: 'Акустическая фигура Хладни (Мода 5 : 3)',
+        cat: 'Акустика',
+        era: 'Эрнст Хладни · Виттенберг, 1787',
+        formula: 'cos(5πx/L)·cos(3πy/L) − cos(3πx/L)·cos(5πy/L) = 0',
+        dim: '38.5 × 38.5 см · Латунная пластина и кварцевый песок',
+        desc: 'Кварцевый песок сбрасывается с вибрирующих пучностей латунной пластины и собирается вдоль узловых линий абсолютного покоя, делая стоячую звуковую волну зримой.',
+        params: { freqX: 5.002, freqY: 3.0, freqRot: 2.0, phaseX: 90, phaseY: 45, damping: 0.0013, rotAmplitude: 0.38, counterRotate: true }
+      },
+      {
+        acc: 'ACC. 2026.03.C',
+        kind: 'epicycle',
+        title: 'Орбитальная розетка Венеры и Земли (8 : 13)',
+        cat: 'Небесная механика',
+        era: 'Иоганн Кеплер · Harmonices Mundi, 1619',
+        formula: '8 T_Земля ≈ 13 T_Венера · Пятилепестковый эпицикл',
+        dim: '50.0 × 50.0 см · Астрономический атлас',
+        desc: 'За восемь земных лет Венера совершает ровно тринадцать оборотов вокруг Солнца. Линия, соединяющая две планеты, вычерчивает вокруг светила цветок с пятью лепестками Фибоначчи.',
+        params: { freqX: 3.002, freqY: 2.0, freqRot: 3.0, phaseX: 90, phaseY: 0, damping: 0.0012, rotAmplitude: 0.45, counterRotate: true }
+      },
+      {
+        acc: 'ACC. 2026.04.D',
+        kind: 'rosette',
+        title: 'Геометрическая матрица обертонов (4 : 5 : 6)',
+        cat: 'Акустика',
+        era: 'Джозеффо Царлино · Венеция, 1558',
+        formula: 'f1 : f2 : f3 = 4 : 5 : 6 · Чистый мажорный трихорд',
+        dim: '36.0 × 36.0 см · Архивный оттиск',
+        desc: 'Соединение большой терции (5:4) и малой терции (6:5) внутри квинты (3:2) рождает симметричную кружевную решётку с одиннадцатью узлами переплетения.',
+        params: { freqX: 5.003, freqY: 4.0, freqRot: 6.0, phaseX: 45, phaseY: 90, damping: 0.0015, rotAmplitude: 0.34, counterRotate: true }
+      }
+    ];
+    let archiveFilter = 'all';
+
+    function buildPlateMarkup(kind, stroke, sec) {
+      if (kind === 'nautilus') {
+        const sp = [];
+        for (let i = 0; i <= 260; i++) {
+          const th = (i / 260) * Math.PI * 5.5;
+          const r = 3.2 * Math.exp(0.30635 * th);
+          sp.push((i === 0 ? 'M ' : 'L ') + (200 + r * Math.cos(th)).toFixed(1) + ' ' + (200 + r * Math.sin(th)).toFixed(1));
+        }
+        return '<svg viewBox="0 0 400 400" style="width:100%; height:100%;"><circle cx="200" cy="200" r="170" fill="none" stroke="' + sec + '" stroke-width="0.8"/><rect x="45" y="45" width="310" height="310" fill="none" stroke="' + sec + '" stroke-width="0.8"/><path d="' + sp.join(' ') + '" fill="none" stroke="' + stroke + '" stroke-width="1.6"/></svg>';
+      }
+      if (kind === 'chladni') {
+        let rays = '';
+        for (let i = 0; i < 16; i++) {
+          const a = (i * Math.PI) / 8;
+          rays += '<path d="M 200 200 Q ' + (200 + 110 * Math.cos(a - 0.25)).toFixed(1) + ' ' + (200 + 110 * Math.sin(a - 0.25)).toFixed(1) + ' ' + (200 + 160 * Math.cos(a)).toFixed(1) + ' ' + (200 + 160 * Math.sin(a)).toFixed(1) + '" fill="none" stroke="' + stroke + '" stroke-width="1.1"/>';
+        }
+        return '<svg viewBox="0 0 400 400" style="width:100%; height:100%;"><rect x="36" y="36" width="328" height="328" fill="none" stroke="' + sec + '"/><circle cx="200" cy="200" r="80" fill="none" stroke="' + stroke + '" stroke-opacity="0.45"/><circle cx="200" cy="200" r="155" fill="none" stroke="' + stroke + '" stroke-opacity="0.45"/>' + rays + '</svg>';
+      }
+      if (kind === 'epicycle') {
+        const pts = [];
+        for (let i = 0; i <= 720; i++) {
+          const t = (i / 720) * Math.PI * 16;
+          const x = 200 + 95 * Math.cos(t) + 65 * Math.cos((13 / 8) * t);
+          const y = 200 + 95 * Math.sin(t) + 65 * Math.sin((13 / 8) * t);
+          pts.push((i === 0 ? 'M ' : 'L ') + x.toFixed(1) + ' ' + y.toFixed(1));
+        }
+        return '<svg viewBox="0 0 400 400" style="width:100%; height:100%;"><circle cx="200" cy="200" r="165" fill="none" stroke="' + sec + '"/><path d="' + pts.join(' ') + '" fill="none" stroke="' + stroke + '" stroke-width="1.15"/></svg>';
+      }
+      const pts = [];
+      for (let i = 0; i <= 600; i++) {
+        const t = (i / 600) * Math.PI * 12;
+        const x = 200 + 110 * Math.sin(5 * t) * Math.cos(t) + 45 * Math.cos(6 * t);
+        const y = 200 + 110 * Math.sin(4 * t) * Math.sin(t) - 45 * Math.sin(6 * t);
+        pts.push((i === 0 ? 'M ' : 'L ') + x.toFixed(1) + ' ' + y.toFixed(1));
+      }
+      return '<svg viewBox="0 0 400 400" style="width:100%; height:100%;"><circle cx="200" cy="200" r="165" fill="none" stroke="' + sec + '"/><path d="' + pts.join(' ') + '" fill="none" stroke="' + stroke + '" stroke-width="1.15"/></svg>';
+    }
+
+    function renderArchive() {
+      const dark = document.body.classList.contains('dark');
+      const stroke = dark ? '#d4a853' : '#1c1917';
+      const sec = dark ? 'rgba(214,206,190,0.32)' : 'rgba(28,25,23,0.28)';
+      const tabsEl = document.getElementById('archiveTabs');
+      tabsEl.innerHTML = '';
+      [
+        { id: 'all', label: 'Все экспонаты (' + (curatedPlates.length + savedEngravings.length) + ')' },
+        { id: 'Акустика', label: 'Акустика' },
+        { id: 'Морфогенез', label: 'Морфогенез' },
+        { id: 'Небесная механика', label: 'Небесная механика' },
+        { id: 'saved', label: 'Ваши гравюры (' + savedEngravings.length + ')' }
+      ].forEach(t => {
+        const b = document.createElement('button');
+        b.textContent = t.label;
+        if (archiveFilter === t.id) b.className = 'active';
+        b.onclick = () => { archiveFilter = t.id; renderArchive(); };
+        tabsEl.appendChild(b);
+      });
+
+      const savedSec = document.getElementById('savedArchiveSection');
+      const savedGrid = document.getElementById('savedArchiveGrid');
+      savedGrid.innerHTML = '';
+      if ((archiveFilter === 'all' || archiveFilter === 'saved') && savedEngravings.length > 0) {
+        savedSec.style.display = 'block';
+        savedEngravings.forEach(item => {
+          const card = document.createElement('article');
+          card.className = 'panel';
+          card.innerHTML = '<div><div class="sans" style="font-size:0.72rem; color:var(--muted); margin-bottom:0.35rem;">' + item.accessionNumber + ' · Личная коллекция · ' + item.ratioLabel + '</div><h3>' + item.title + '</h3><div class="plate-svg-box"><svg viewBox="0 0 400 400" style="width:100%; height:100%;"><path d="' + item.svgPath + '" fill="none" stroke="' + stroke + '" stroke-width="1.2"/></svg></div><div class="mono" style="font-size:0.72rem; color:var(--muted);">' + item.equation + '</div></div>';
+          const loadBtn = document.createElement('button');
+          loadBtn.style.marginTop = '1rem';
+          loadBtn.textContent = 'Воспроизвести на столе ↑';
+          loadBtn.onclick = () => {
+            params = Object.assign({}, item.params);
+            syncUI();
+            document.getElementById('harmonograph').scrollIntoView({ behavior: 'smooth' });
+          };
+          card.appendChild(loadBtn);
+          savedGrid.appendChild(card);
+        });
+      } else {
+        savedSec.style.display = 'none';
+      }
+
+      const curatedGrid = document.getElementById('curatedArchiveGrid');
+      curatedGrid.innerHTML = '';
+      const list = archiveFilter === 'all' ? curatedPlates : archiveFilter === 'saved' ? [] : curatedPlates.filter(p => p.cat === archiveFilter);
+      list.forEach(p => {
+        const card = document.createElement('article');
+        card.className = 'panel';
+        card.innerHTML = '<div><div class="sans" style="font-size:0.72rem; color:var(--muted); margin-bottom:0.35rem;">' + p.acc + ' · ' + p.cat + ' · ' + p.era + '</div><h3>' + p.title + '</h3><div class="plate-svg-box">' + buildPlateMarkup(p.kind, stroke, sec) + '</div><p style="font-size:0.88rem; color:var(--muted);">' + p.desc + '</p><dl class="meta-dl"><div><dt style="color:var(--muted);">Уравнение кривой</dt><dd class="mono">' + p.formula + '</dd></div><div><dt style="color:var(--muted);">Техника и размер</dt><dd>' + p.dim + '</dd></div></dl></div>';
+        const loadBtn = document.createElement('button');
+        loadBtn.style.marginTop = '1rem';
+        loadBtn.textContent = 'Загрузить в гармониограф ↑';
+        loadBtn.onclick = () => {
+          params = Object.assign({}, p.params);
+          syncUI();
+          document.getElementById('harmonograph').scrollIntoView({ behavior: 'smooth' });
+        };
+        card.appendChild(loadBtn);
+        curatedGrid.appendChild(card);
+      });
+    }
+
     syncUI();
-    render();
+    renderHarmonograph();
+    renderPhyllotaxis();
+    pluckMono(activeMono, false);
+    renderMonochord();
+    renderArchive();
   </script>
 </body>
 </html>

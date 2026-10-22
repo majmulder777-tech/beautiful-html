@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AETHER // ОПТИКА ВРЕМЕНИ — Интерактивная световая скульптура</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Google Fonts: Cormorant Garamond (Editorial Serif), Inter (UI), JetBrains Mono (Telemetry) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@200;300;400;500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent: #f59e0b;
+            --accent-glow: rgba(245, 158, 11, 0.35);
+            --glass-bg: rgba(8, 10, 16, 0.58);
+            --glass-border: rgba(255, 255, 255, 0.11);
+            --glass-highlight: rgba(255, 255, 255, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #020306;
+            color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+            cursor: none;
+        }
+
+        /* Restore default cursor on touch devices */
+        @media (pointer: coarse) {
+            html, body {
+                cursor: auto;
+            }
+            #custom-cursor-container {
+                display: none !important;
+            }
+        }
+
+        .font-serif-editorial {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+        }
+
+        .font-mono-tech {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Glassmorphism Panels */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(22px) saturate(140%);
+            -webkit-backdrop-filter: blur(22px) saturate(140%);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+            transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        /* Interactive Buttons */
+        .hud-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: none;
+        }
+
+        .hud-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, var(--accent-glow) 0%, transparent 75%);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+
+        .hud-btn:hover {
+            border-color: rgba(255, 255, 255, 0.32);
+            transform: translateY(-1px);
+            color: #ffffff;
+        }
+
+        .hud-btn:hover::before {
+            opacity: 0.45;
+        }
+
+        .hud-btn.active {
+            background: rgba(255, 255, 255, 0.09);
+            border-color: var(--accent);
+            box-shadow: 0 0 25px var(--accent-glow), inset 0 0 12px var(--accent-glow);
+        }
+
+        /* Custom Range Sliders */
+        input[type="range"].aether-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            outline: none;
+            cursor: none;
+            transition: background 0.2s;
+        }
+
+        input[type="range"].aether-slider:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        input[type="range"].aether-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 12px var(--accent);
+            cursor: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input[type="range"].aether-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.28);
+            box-shadow: 0 0 18px var(--accent);
+        }
+
+        input[type="range"].aether-slider::-moz-range-thumb {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 12px var(--accent);
+            cursor: none;
+            transition: transform 0.2s ease;
+        }
+
+        /* UI Transitions for Zen Mode */
+        .hud-element {
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.zen-mode .hud-element {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transform: translateY(12px) scale(0.985);
+        }
+
+        body.zen-mode #zen-exit-pill {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: translate(-50%, 0) !important;
+        }
+
+        /* Subtle vignette & film grain overlay */
+        .vignette-overlay {
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 50%, transparent 45%, rgba(2, 3, 8, 0.68) 100%);
+        }
+
+        /* Animations */
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.35; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.04); }
+        }
+
+        .animate-pulse-slow {
+            animation: pulse-slow 4s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar for small screens if needed */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="relative w-full h-full select-none overflow-hidden">
+
+    <!-- 1. WEBGL CANVAS CONTAINER -->
+    <div id="webgl-container" class="fixed inset-0 w-full h-full z-0"></div>
+
+    <!-- 2. OPTICAL VIGNETTE OVERLAY -->
+    <div class="vignette-overlay fixed inset-0 z-10"></div>
+
+    <!-- 3. CAMERA SHUTTER FLASH OVERLAY -->
+    <div id="shutter-flash" class="fixed inset-0 bg-white pointer-events-none z-50 opacity-0 transition-opacity duration-500"></div>
+
+    <!-- 4. CUSTOM INERTIA CROSSHAIR CURSOR -->
+    <div id="custom-cursor-container" class="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+        <!-- Precise Center Dot -->
+        <div id="cursor-dot" class="fixed top-0 left-0 w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full bg-white shadow-[0_0_10px_#fff] transition-transform duration-75"></div>
+        <!-- Inertia Outer Ring + SVG Singularity Charge Progress -->
+        <div id="cursor-ring" class="fixed top-0 left-0 w-11 h-11 -ml-[22px] -mt-[22px] flex items-center justify-center">
+            <svg class="w-full h-full -rotate-90 overflow-visible" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="0.8" stroke-dasharray="2 3" />
+                <circle id="cursor-charge-circle" cx="22" cy="22" r="18" fill="none" stroke="var(--accent)" stroke-width="1.75" stroke-dasharray="113.1" stroke-dashoffset="113.1" stroke-linecap="round" />
+            </svg>
+            <div class="absolute w-3 h-[0.5px] bg-white/30 -left-2"></div>
+            <div class="absolute w-3 h-[0.5px] bg-white/30 -right-2"></div>
+            <div class="absolute h-3 w-[0.5px] bg-white/30 -top-2"></div>
+            <div class="absolute h-3 w-[0.5px] bg-white/30 -bottom-2"></div>
+        </div>
+        <!-- Cursor Dynamic Telemetry Tag -->
+        <div id="cursor-label" class="fixed top-0 left-0 ml-6 mt-4 font-mono-tech text-[9px] tracking-widest text-white/50 uppercase opacity-0 transition-opacity duration-300">
+            СИНГУЛЯРНОСТЬ: ЗАРЯД
+        </div>
+    </div>
+
+    <!-- 5. ATMOSPHERIC ENTRY SCREEN (AUDIO & SYNTHESIS INITIALIZATION) -->
+    <div id="entry-overlay" class="fixed inset-0 z-40 flex flex-col items-center justify-between p-6 md:p-12 bg-black/65 backdrop-blur-xl transition-all duration-1000">
+        <!-- Top Museum Header -->
+        <div class="w-full flex justify-between items-center text-[10px] font-mono-tech tracking-[0.25em] text-white/45 uppercase">
+            <span>ЭКСПОЗИЦИЯ № 04 // ВЫЧИСЛИТЕЛЬНАЯ КОСМОЛОГИЯ</span>
+            <span class="hidden sm:inline">GLSL WEBGL 2.0 + СИНТЕЗ WEB AUDIO</span>
+            <span>КООРДИНАТЫ: 00h 42m 44s</span>
+        </div>
+
+        <!-- Center Hero Invitation -->
+        <div class="max-w-2xl text-center flex flex-col items-center my-auto px-4">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-white/15 bg-white/5 mb-6">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
+                <span class="font-mono-tech text-[10px] tracking-[0.22em] text-white/80 uppercase">АУДИОВИЗУАЛЬНАЯ ИНСТАЛЛЯЦИЯ РЕАЛЬНОГО ВРЕМЕНИ</span>
+            </div>
+
+            <h1 class="font-serif-editorial text-5xl sm:text-7xl md:text-8xl font-light tracking-wider text-white mb-3 leading-none">
+                AETHER
+            </h1>
+            <p class="font-mono-tech text-xs sm:text-sm tracking-[0.45em] text-amber-300/90 uppercase mb-8">
+                // ОПТИКА ВРЕМЕНИ
+            </p>
+
+            <p class="font-serif-editorial italic text-lg sm:text-2xl text-white/75 max-w-xl leading-relaxed mb-10 font-light">
+                «Свет не просто пересекает пустоту — он помнит гравитацию каждой звезды, мимо которой прошёл, превращая геометрию времени в музыку».
+            </p>
+
+            <button id="init-experience-btn" class="hud-btn group relative px-8 py-4 rounded-full border border-white/25 bg-white/5 hover:bg-white/10 transition-all duration-500 shadow-[0_0_40px_rgba(245,158,11,0.2)]">
+                <span class="relative z-10 flex items-center gap-3 font-mono-tech text-[11px] sm:text-xs tracking-[0.22em] text-white uppercase">
+                    <svg class="w-4 h-4 text-amber-400 transition-transform duration-500 group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    ИНИЦИАЛИЗАЦИЯ СИНГУЛЯРНОСТИ — НАЖМИТЕ ДЛЯ ЗАПУСКА СИНТЕЗА СВЕТА И ЗВУКА
+                </span>
+            </button>
+
+            <div class="mt-8 grid grid-cols-3 gap-6 text-center font-mono-tech text-[10px] text-white/40 tracking-widest uppercase">
+                <div>
+                    <span class="block text-white/70 mb-0.5">ДВИЖЕНИЕ КУРСОРА</span>
+                    Искривление метрики
+                </div>
+                <div>
+                    <span class="block text-white/70 mb-0.5">УДЕРЖАНИЕ КЛИКА</span>
+                    Гравитационный коллапс
+                </div>
+                <div>
+                    <span class="block text-white/70 mb-0.5">ОТПУСКАНИЕ</span>
+                    Релятивистский импульс
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Footer -->
+        <div class="w-full flex justify-between items-center text-[10px] font-mono-tech tracking-[0.2em] text-white/35 uppercase">
+            <span>48 000 ФОТОННЫХ ЧАСТИЦ</span>
+            <span>РЕКОМЕНДУЕТСЯ ИСПОЛЬЗОВАТЬ НАУШНИКИ</span>
+        </div>
+    </div>
+
+    <!-- 6. MAIN HUD INTERFACE -->
+    <div id="hud-root" class="fixed inset-0 z-20 pointer-events-none flex flex-col justify-between p-4 sm:p-6 md:p-8">
+
+        <!-- TOP BAR: TITLE, SPECTRUM & SYSTEM ACTIONS -->
+        <header class="hud-element w-full flex flex-wrap items-start justify-between gap-4 pointer-events-auto">
+            <!-- Brand & Poetic Subtitle -->
+            <div class="glass-panel rounded-2xl px-5 py-3.5 flex items-center gap-4">
+                <div class="relative flex items-center justify-center w-8 h-8 rounded-full border border-white/20 bg-white/5">
+                    <div id="core-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_12px_#f59e0b]"></div>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2.5">
+                        <h2 class="font-serif-editorial text-xl sm:text-2xl font-normal tracking-wider text-white leading-none">
+                            AETHER
+                        </h2>
+                        <span class="text-white/25 font-mono-tech text-xs">//</span>
+                        <span class="font-mono-tech text-[10px] sm:text-[11px] tracking-[0.28em] text-white/80 uppercase">
+                            ОПТИКА ВРЕМЕНИ
+                        </span>
+                    </div>
+                    <p id="epoch-poetic-subtitle" class="font-serif-editorial italic text-xs sm:text-sm text-white/65 mt-0.5 transition-opacity duration-500">
+                        «Угасающее эхо древней звезды в янтарных кольцах гравитации...»
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Controls: Audio Synth, Spectrum Visualizer, Snapshot, Zen Mode -->
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <!-- Real-Time Audio Spectrum & Toggle -->
+                <div class="glass-panel rounded-2xl px-3.5 py-2 flex items-center gap-3">
+                    <canvas id="audio-spectrum-canvas" width="76" height="26" class="opacity-85"></canvas>
+                    <button id="audio-toggle-btn" class="hud-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] tracking-[0.18em] uppercase text-white/90 flex items-center gap-2">
+                        <span id="audio-indicator-dot" class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
+                        <span id="audio-toggle-text">ЗВУК: ВКЛ</span>
+                    </button>
+                </div>
+
+                <!-- Frame Capture Button -->
+                <button id="capture-frame-btn" class="glass-panel hud-btn rounded-2xl px-4 py-3 font-mono-tech text-[10px] tracking-[0.18em] uppercase text-white/85 flex items-center gap-2" title="Сохранить снимок высокой чёткости">
+                    <svg class="w-3.5 h-3.5 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="hidden sm:inline">СНИМОК КАДРА</span>
+                </button>
+
+                <!-- Zen / Contemplation Mode Button -->
+                <button id="zen-mode-btn" class="glass-panel hud-btn rounded-2xl px-4 py-3 font-mono-tech text-[10px] tracking-[0.18em] uppercase text-white/85 flex items-center gap-2" title="Горячая клавиша [H]">
+                    <svg class="w-3.5 h-3.5 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span class="hidden md:inline">РЕЖИМ СОЗЕРЦАНИЯ</span>
+                    <span class="text-white/40">[H]</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MIDDLE SECTION: TELEMETRY (LEFT) & OPTICS CONTROL DECK (RIGHT) -->
+        <div class="w-full flex flex-col lg:flex-row items-stretch lg:items-end justify-between gap-4 my-auto lg:my-0 pointer-events-none">
+
+            <!-- LEFT: REAL-TIME TELEMETRY & SINGULARITY STATUS -->
+            <aside class="hud-element pointer-events-auto glass-panel rounded-2xl p-4 sm:p-5 w-full lg:w-72 flex flex-col gap-3.5 self-start lg:self-end">
+                <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
+                    <span class="font-mono-tech text-[10px] tracking-[0.22em] text-white/60 uppercase">ТЕЛЕМЕТРИЯ ПОЛЯ</span>
+                    <span id="telemetry-state-badge" class="font-mono-tech text-[9px] px-2 py-0.5 rounded bg-white/10 text-amber-300 uppercase tracking-widest">
+                        СТАБИЛЬНО
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-y-2.5 gap-x-4 font-mono-tech text-[11px]">
+                    <div>
+                        <div class="text-[9px] text-white/40 uppercase tracking-wider">ЧАСТОТА КАДРОВ</div>
+                        <div class="text-white/90 font-medium"><span id="tel-fps">60</span> <span class="text-[9px] text-white/40">FPS</span></div>
+                    </div>
+                    <div>
+                        <div class="text-[9px] text-white/40 uppercase tracking-wider">КВАНТЫ СВЕТА</div>
+                        <div class="text-white/90 font-medium"><span id="tel-particles">48 000</span></div>
+                    </div>
+                    <div>
+                        <div class="text-[9px] text-white/40 uppercase tracking-wider">ИНДЕКС ЭНТРОПИИ</div>
+                        <div class="text-white/90 font-medium"><span id="tel-entropy">0.418</span> <span class="text-[9px] text-white/40">S/k</span></div>
+                    </div>
+                    <div>
+                        <div class="text-[9px] text-white/40 uppercase tracking-wider">ДИЛАТАЦИЯ (γ)</div>
+                        <div class="text-white/90 font-medium"><span id="tel-dilation">1.000</span><span class="text-[9px] text-white/40">x</span></div>
+                    </div>
+                    <div>
+                        <div class="text-[9px] text-white/40 uppercase tracking-wider">ВЕКТОР ПОЛЯ</div>
+                        <div class="text-white/90 font-medium text-[10px]" id="tel-coords">+0.00, +0.00</div>
+                    </div>
+                    <div>
+                        <div class="text-[9px] text-white/40 uppercase tracking-wider">РЕЗОНАНС СИНТЕЗА</div>
+                        <div class="text-white/90 font-medium"><span id="tel-freq">110.0</span> <span class="text-[9px] text-white/40">Гц</span></div>
+                    </div>
+                </div>
+
+                <!-- Interactive Harmonic Impulse Trigger -->
+                <div class="pt-1 border-t border-white/10 flex items-center justify-between gap-2">
+                    <button id="trigger-shockwave-btn" class="hud-btn w-full py-2 px-3 rounded-xl font-mono-tech text-[10px] tracking-[0.16em] uppercase text-white/85 flex items-center justify-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        ИМПУЛЬС СИНГУЛЯРНОСТИ [ПРОБЕЛ]
+                    </button>
+                </div>
+            </aside>
+
+            <!-- RIGHT: COLLAPSIBLE OPTICS & PHYSICS CONTROL DECK -->
+            <aside class="hud-element pointer-events-auto glass-panel rounded-2xl w-full lg:w-80 overflow-hidden transition-all duration-500 self-end">
+                <!-- Deck Header with Collapse Toggle -->
+                <div id="deck-header" class="px-5 py-3.5 flex items-center justify-between border-b border-white/10 cursor-pointer hover:bg-white/5 transition-colors">
+                    <div class="flex items-center gap-2.5">
+                        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        <span class="font-mono-tech text-[10px] tracking-[0.22em] text-white/85 uppercase">ДЕКА ОПТИКИ И ФИЗИКИ</span>
+                    </div>
+                    <button id="collapse-deck-btn" class="text-white/50 hover:text-white transition-transform duration-300" title="Свернуть / Развернуть">
+                        <svg id="collapse-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Sliders Body -->
+                <div id="deck-body" class="p-5 space-y-4 transition-all duration-500">
+                    <!-- 1. Gravity / Attractor Strength -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between font-mono-tech text-[10px]">
+                            <span class="text-white/70 tracking-wider uppercase">ГРАВИТАЦИЯ (МАССА ЯДРА)</span>
+                            <span id="val-gravity" class="text-amber-300">1.25 G</span>
+                        </div>
+                        <input id="slider-gravity" type="range" min="0.1" max="3.0" step="0.01" value="1.25" class="aether-slider">
+                    </div>
+
+                    <!-- 2. Chromatic Dispersion -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between font-mono-tech text-[10px]">
+                            <span class="text-white/70 tracking-wider uppercase">ХРОМАТИЧЕСКАЯ ДИСПЕРСИЯ</span>
+                            <span id="val-dispersion" class="text-amber-300">0.65 λ</span>
+                        </div>
+                        <input id="slider-dispersion" type="range" min="0.0" max="2.0" step="0.01" value="0.65" class="aether-slider">
+                    </div>
+
+                    <!-- 3. Turbulence (Curl Noise Chaos) -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between font-mono-tech text-[10px]">
+                            <span class="text-white/70 tracking-wider uppercase">ТУРБУЛЕНТНОСТЬ ЭФИРА</span>
+                            <span id="val-turbulence" class="text-amber-300">0.80 Ω</span>
+                        </div>
+                        <input id="slider-turbulence" type="range" min="0.05" max="2.5" step="0.01" value="0.80" class="aether-slider">
+                    </div>
+
+                    <!-- 4. Time Dilation / Exposure -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between font-mono-tech text-[10px]">
+                            <span class="text-white/70 tracking-wider uppercase">ВЫДЕРЖКА / ВРЕМЯ (Δt)</span>
+                            <span id="val-time" class="text-amber-300">1.00x</span>
+                        </div>
+                        <input id="slider-time" type="range" min="0.0" max="3.0" step="0.01" value="1.00" class="aether-slider">
+                    </div>
+
+                    <!-- Reset Preset Parameters -->
+                    <div class="pt-2 flex justify-between items-center border-t border-white/10">
+                        <span class="font-serif-editorial italic text-xs text-white/45">Удерживайте клик в пространстве для сжатия</span>
+                        <button id="reset-params-btn" class="font-mono-tech text-[9px] tracking-widest uppercase text-white/50 hover:text-white underline underline-offset-4">
+                            СБРОС
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- BOTTOM BAR: FOUR VISUAL EPOCHS SELECTOR -->
+        <footer class="hud-element w-full flex flex-col items-center justify-end pointer-events-auto">
+            <div class="glass-panel rounded-2xl p-1.5 sm:p-2 w-full max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2">
+                <!-- Epoch I -->
+                <button data-epoch="0" class="epoch-btn hud-btn active rounded-xl px-3.5 py-2.5 text-left flex flex-col justify-between group">
+                    <div class="flex items-center justify-between w-full mb-1">
+                        <span class="font-mono-tech text-[9px] tracking-[0.2em] text-amber-400/90 uppercase">ЭПОХА I</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 opacity-90"></span>
+                    </div>
+                    <div class="font-serif-editorial text-sm sm:text-base font-medium tracking-wide text-white">
+                        I. ЗАКАТ СВЕРХНОВОЙ
+                    </div>
+                    <div class="font-mono-tech text-[9px] text-white/45 truncate mt-0.5">
+                        Янтарная плазма • Орбитальный распад
+                    </div>
+                </button>
+
+                <!-- Epoch II -->
+                <button data-epoch="1" class="epoch-btn hud-btn rounded-xl px-3.5 py-2.5 text-left flex flex-col justify-between group">
+                    <div class="flex items-center justify-between w-full mb-1">
+                        <span class="font-mono-tech text-[9px] tracking-[0.2em] text-cyan-300/90 uppercase">ЭПОХА II</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-300 opacity-50"></span>
+                    </div>
+                    <div class="font-serif-editorial text-sm sm:text-base font-medium tracking-wide text-white">
+                        II. ГОРИЗОНТ СОБЫТИЙ
+                    </div>
+                    <div class="font-mono-tech text-[9px] text-white/45 truncate mt-0.5">
+                        Обсидиановый вакуум • Линзирование
+                    </div>
+                </button>
+
+                <!-- Epoch III -->
+                <button data-epoch="2" class="epoch-btn hud-btn rounded-xl px-3.5 py-2.5 text-left flex flex-col justify-between group">
+                    <div class="flex items-center justify-between w-full mb-1">
+                        <span class="font-mono-tech text-[9px] tracking-[0.2em] text-emerald-300/90 uppercase">ЭПОХА III</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-50"></span>
+                    </div>
+                    <div class="font-serif-editorial text-sm sm:text-base font-medium tracking-wide text-white">
+                        III. КВАНТОВАЯ ПЕНА
+                    </div>
+                    <div class="font-mono-tech text-[9px] text-white/45 truncate mt-0.5">
+                        Биолюминесценция • Интерференция
+                    </div>
+                </button>
+
+                <!-- Epoch IV -->
+                <button data-epoch="3" class="epoch-btn hud-btn rounded-xl px-3.5 py-2.5 text-left flex flex-col justify-between group">
+                    <div class="flex items-center justify-between w-full mb-1">
+                        <span class="font-mono-tech text-[9px] tracking-[0.2em] text-fuchsia-300/90 uppercase">ЭПОХА IV</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-fuchsia-400 opacity-50"></span>
+                    </div>
+                    <div class="font-serif-editorial text-sm sm:text-base font-medium tracking-wide text-white">
+                        IV. СОЛЯРИС
+                    </div>
+                    <div class="font-mono-tech text-[9px] text-white/45 truncate mt-0.5">
+                        Мыслящий океан • Нейронные волны
+                    </div>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 7. FLOATING ZEN MODE EXIT PILL -->
+    <button id="zen-exit-pill" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-8 opacity-0 pointer-events-none z-30 glass-panel hud-btn rounded-full px-5 py-2.5 font-mono-tech text-[10px] tracking-[0.24em] text-white/75 uppercase transition-all duration-500">
+        ВЕРНУТЬ ИНТЕРФЕЙС [H]
+    </button>
+
+    <!-- 8. NOTIFICATION TOAST FOR SNAPSHOTS -->
+    <div id="toast-notification" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 glass-panel rounded-full px-5 py-2 font-mono-tech text-[10px] tracking-[0.2em] text-white uppercase opacity-0 pointer-events-none transition-all duration-500 -translate-y-3">
+        ОПТИЧЕСКИЙ СЛЕПОК СОХРАНЁН В ВЫСОКОМ РАЗРЕШЕНИИ
+    </div>
+
+    <!-- ==========================================================================
+         GLSL SHADERS & APPLICATION ARCHITECTURE
+         ========================================================================== -->
+    <script>
+        /**
+         * EPOCH DEFINITIONS (Presets for Smooth Interpolation)
+         * Each epoch defines color palettes, shader morphology, physics defaults, and harmonic tunings.
+         */
+        const EPOCHS = [
+            {
+                id: 0,
+                name: "I. ЗАКАТ СВЕРХНОВОЙ",
+                subtitle: "«Угасающее эхо древней звезды в янтарных кольцах гравитации...»",
+                accentHex: "#f59e0b",
+                accentGlow: "rgba(245, 158, 11, 0.35)",
+                corePrimary: new THREE.Color("#ff7b1c"),
+                coreSecondary: new THREE.Color("#7e1fff"),
+                coreDeep: new THREE.Color("#14041d"),
+                particleInner: new THREE.Color("#ffbe55"),
+                particleOuter: new THREE.Color("#a82ffc"),
+                gravity: 1.25,
+                dispersion: 0.65,
+                turbulence: 0.80,
+                timeScale: 1.00,
+                jetIntensity: 0.25,
+                oceanWaveMode: 0.0,
+                baseFreq: 110.0, // A2 warm cosmic drone
+                scaleIntervals: [0, 2, 4, 7, 9, 12, 14, 16, 19] // Lydian pentatonic
+            },
+            {
+                id: 1,
+                name: "II. ГОРИЗОНТ СОБЫТИЙ",
+                subtitle: "«Там, где параллельные лучи пересекаются, а будущее становится радиальным направлением...»",
+                accentHex: "#38bdf8",
+                accentGlow: "rgba(56, 189, 248, 0.35)",
+                corePrimary: new THREE.Color("#e0f7ff"),
+                coreSecondary: new THREE.Color("#0077ff"),
+                coreDeep: new THREE.Color("#010206"),
+                particleInner: new THREE.Color("#ffffff"),
+                particleOuter: new THREE.Color("#00b4ff"),
+                gravity: 2.25,
+                dispersion: 1.35,
+                turbulence: 0.45,
+                timeScale: 1.35,
+                jetIntensity: 1.45,
+                oceanWaveMode: 0.0,
+                baseFreq: 82.41, // E2 deep singularity sub
+                scaleIntervals: [0, 3, 5, 7, 10, 12, 15, 19, 22]
+            },
+            {
+                id: 2,
+                name: "III. КВАНТОВАЯ ПЕНА",
+                subtitle: "«На планковских масштабах пустота кипит рождением и аннигиляцией виртуальных миров...»",
+                accentHex: "#10b981",
+                accentGlow: "rgba(16, 185, 129, 0.35)",
+                corePrimary: new THREE.Color("#00ffa6"),
+                coreSecondary: new THREE.Color("#1d4ed8"),
+                coreDeep: new THREE.Color("#021619"),
+                particleInner: new THREE.Color("#34f5c5"),
+                particleOuter: new THREE.Color("#4f46e5"),
+                gravity: 0.75,
+                dispersion: 1.55,
+                turbulence: 1.95,
+                timeScale: 1.15,
+                jetIntensity: 0.40,
+                oceanWaveMode: 0.35,
+                baseFreq: 130.81, // C3 crystalline
+                scaleIntervals: [0, 2, 6, 7, 11, 12, 14, 18, 19]
+            },
+            {
+                id: 3,
+                name: "IV. СОЛЯРИС",
+                subtitle: "«Мыслящий океан света, воспроизводящий сокровенные ландшафты человеческой памяти...»",
+                accentHex: "#e879f9",
+                accentGlow: "rgba(232, 121, 249, 0.35)",
+                corePrimary: new THREE.Color("#ffaa33"),
+                coreSecondary: new THREE.Color("#d946ef"),
+                coreDeep: new THREE.Color("#190626"),
+                particleInner: new THREE.Color("#fcd34d"),
+                particleOuter: new THREE.Color("#c026d3"),
+                gravity: 1.05,
+                dispersion: 0.90,
+                turbulence: 1.10,
+                timeScale: 0.85,
+                jetIntensity: 0.10,
+                oceanWaveMode: 1.25,
+                baseFreq: 98.00, // G2 sentient harmonic
+                scaleIntervals: [0, 4, 7, 9, 11, 12, 16, 19, 23]
+            }
+        ];
+
+        /**
+         * SHARED GLSL 3D SIMPLEX NOISE & CURL HELPERS
+         */
+        const GLSL_NOISE_CHUNK = `
+            vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
+            vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
+
+            float snoise(vec3 v){
+                const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+                const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+
+                vec3 i  = floor(v + dot(v, C.yyy));
+                vec3 x0 = v - i + dot(i, C.xxx);
+
+                vec3 g = step(x0.yzx, x0.xyz);
+                vec3 l = 1.0 - g;
+                vec3 i1 = min(g.xyz, l.zxy);
+                vec3 i2 = max(g.xyz, l.zxy);
+
+                vec3 x1 = x0 - i1 + 1.0 * C.xxx;
+                vec3 x2 = x0 - i2 + 2.0 * C.xxx;
+                vec3 x3 = x0 - 1.0 + 3.0 * C.xxx;
+
+                i = mod(i, 289.0);
+                vec4 p = permute( permute( permute(
+                            i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+                        + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+                        + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+
+                float n_ = 1.0/7.0;
+                vec3  ns = n_ * D.wyz - D.xzx;
+
+                vec4 j = p - 49.0 * floor(p * ns.z *ns.z);
+
+                vec4 x_ = floor(j * ns.z);
+                vec4 y_ = floor(j - 7.0 * x_ );
+
+                vec4 x = x_ *ns.x + ns.yyyy;
+                vec4 y = y_ *ns.x + ns.yyyy;
+                vec4 h = 1.0 - abs(x) - abs(y);
+
+                vec4 b0 = vec4( x.xy, y.xy );
+                vec4 b1 = vec4( x.zw, y.zw );
+
+                vec4 s0 = floor(b0)*2.0 + 1.0;
+                vec4 s1 = floor(b1)*2.0 + 1.0;
+                vec4 sh = -step(h, vec4(0.0));
+
+                vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+                vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+
+                vec3 p0 = vec3(a0.xy,h.x);
+                vec3 p1 = vec3(a0.zw,h.y);
+                vec3 p2 = vec3(a1.xy,h.z);
+                vec3 p3 = vec3(a1.zw,h.w);
+
+                vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+                p0 *= norm.x;
+                p1 *= norm.y;
+                p2 *= norm.z;
+                p3 *= norm.w;
+
+                vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                m = m * m;
+                return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+            }
+
+            // Pseudo-curl field for organic fluid motion
+            vec3 curlField(vec3 p, float t) {
+                float n1 = snoise(p + vec3(0.0, t * 0.25, 0.0));
+                float n2 = snoise(p + vec3(31.4, -t * 0.2, 12.7));
+                float n3 = snoise(p + vec3(-19.1, t * 0.15, 47.2));
+                return vec3(n1 - n2, n2 - n3, n3 - n1);
+            }
+        `;
+
+        /**
+         * 1. CENTRAL ANOMALY (FERROFLUID / SINGULARITY CORE) SHADERS
+         */
+        const CORE_VERTEX_SHADER = `
+            uniform float uTime;
+            uniform float uGravity;
+            uniform float uTurbulence;
+            uniform float uDispersion;
+            uniform float uCharge;
+            uniform float uShockwave;
+            uniform float uOceanWave;
+            uniform vec3 uCursorWorld;
+
+            varying vec3 vNormal;
+            varying vec3 vWorldPosition;
+            varying float vDisplacement;
+            varying float vEyeDot;
+
+            ${GLSL_NOISE_CHUNK}
+
+            void main() {
+                vec3 pos = position;
+                vec3 norm = normal;
+
+                // Multi-octave organic ferrofluid displacement
+                float slowTime = uTime * 0.45;
+                float n1 = snoise(norm * (1.8 + uTurbulence * 0.8) + vec3(slowTime));
+                float n2 = snoise(norm * (4.2 + uTurbulence * 1.5) - vec3(slowTime * 1.4));
+                float n3 = snoise(norm * 8.5 + vec3(0.0, slowTime * 2.2, 0.0));
+
+                // Solaris harmonic surface ripples
+                float harmonicWave = sin(pos.y * 6.0 - uTime * 3.0) * cos(pos.x * 5.0 + uTime * 2.0) * uOceanWave * 0.22;
+
+                // Cursor proximity tidal pull
+                vec3 toCursor = uCursorWorld - pos;
+                float cursorDist = length(toCursor);
+                float cursorPull = smoothstep(7.5, 0.0, cursorDist) * 0.45;
+
+                // Singularity charge spikes (ferrofluid magnetic spikes when holding mouse)
+                float spikeNoise = pow(abs(n2), 1.5) * (0.35 + uCharge * 0.85);
+
+                float totalDisp = (n1 * 0.28 + spikeNoise + n3 * 0.06) * (0.4 + uTurbulence * 0.55) + harmonicWave + cursorPull;
+
+                // Contract core radius under strong gravity or active singularity charge
+                float contraction = 1.0 - (uCharge * 0.32) - (uGravity - 1.0) * 0.08;
+                // Shockwave expansion pulse
+                float shockPulse = sin(uShockwave * 3.14159) * 0.55 * (1.0 + n1 * 0.5);
+
+                vec3 displacedPos = pos * contraction + norm * (totalDisp + shockPulse);
+
+                vec4 worldPosition = modelMatrix * vec4(displacedPos, 1.0);
+                vWorldPosition = worldPosition.xyz;
+
+                // Perturb normal for liquid iridescence
+                vec3 perturbedNormal = normalize(normalMatrix * normalize(norm + vec3(n2 * 0.38, n3 * 0.38, n1 * 0.38)));
+                vNormal = perturbedNormal;
+                vDisplacement = totalDisp;
+
+                vec3 viewDir = normalize(cameraPosition - worldPosition.xyz);
+                vEyeDot = max(0.0, dot( normalize(mat3(modelMatrix) * norm), viewDir ));
+
+                gl_Position = projectionMatrix * viewMatrix * worldPosition;
+            }
+        `;
+
+        const CORE_FRAGMENT_SHADER = `
+            uniform float uTime;
+            uniform float uDispersion;
+            uniform float uCharge;
+            uniform float uShockwave;
+            uniform vec3 uColorPrimary;
+            uniform vec3 uColorSecondary;
+            uniform vec3 uColorDeep;
+
+            varying vec3 vNormal;
+            varying vec3 vWorldPosition;
+            varying float vDisplacement;
+            varying float vEyeDot;
+
+            // Thin-film spectral iridescence approximation
+            vec3 thinFilmIridescence(float cosA, float shift) {
+                vec3 phase = vec3(0.0, 0.33, 0.67) + shift;
+                return 0.5 + 0.5 * cos(6.28318 * (cosA * 1.85 + phase));
+            }
+
+            void main() {
+                vec3 viewDir = normalize(cameraPosition - vWorldPosition);
+                vec3 normal = normalize(vNormal);
+
+                // Fresnel rim factor for gravitational lensing glow
+                float fresnel = pow(1.0 - max(0.0, dot( normal, viewDir )), 2.6);
+
+                // Chromatic dispersion across the liquid crests
+                float dispShift = vDisplacement * (1.2 + uDispersion * 1.5) + uTime * 0.08;
+                vec3 irid = thinFilmIridescence(fresnel, dispShift);
+
+                // Base obsidian core + bioluminescent veins
+                float veinPattern = smoothstep(-0.15, 0.45, vDisplacement);
+                vec3 coreColor = mix(uColorDeep, uColorSecondary, veinPattern * 0.85);
+                coreColor = mix(coreColor, uColorPrimary, pow(fresnel, 1.4));
+
+                // Blend thin-film chromatic dispersion
+                coreColor = mix(coreColor, irid * uColorPrimary * 1.6, uDispersion * 0.42 * (fresnel + veinPattern * 0.5));
+
+                // Singularity charge white-hot incandescence
+                coreColor += vec3(1.0, 0.92, 0.85) * (uCharge * 0.75 * fresnel + uShockwave * 0.65);
+
+                // Event horizon central absorption effect
+                float horizonDarkening = smoothstep(0.0, 0.65, 1.0 - vEyeDot * 0.65);
+                coreColor *= mix(0.35, 1.35, horizonDarkening);
+
+                gl_FragColor = vec4(coreColor, 0.96);
+            }
+        `;
+
+        /**
+         * 2. ACCRETION HALO / LENSING RING SHADERS
+         */
+        const HALO_VERTEX_SHADER = `
+            varying vec2 vUv;
+            varying vec3 vPos;
+            void main() {
+                vUv = uv;
+                vPos = position;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const HALO_FRAGMENT_SHADER = `
+            uniform float uTime;
+            uniform float uCharge;
+            uniform float uShockwave;
+            uniform float uDispersion;
+            uniform vec3 uColorPrimary;
+            uniform vec3 uColorSecondary;
+
+            varying vec2 vUv;
+            varying vec3 vPos;
+
+            ${GLSL_NOISE_CHUNK}
+
+            void main() {
+                vec2 centered = vUv * 2.0 - 1.0;
+                float r = length(centered);
+                float angle = atan(centered.y, centered.x);
+
+                // Accretion disk radial falloff
+                float ringMask = smoothstep(0.24, 0.42, r) * (1.0 - smoothstep(0.45, 0.98, r));
+
+                // Relativistic spiral filaments
+                float spiral = angle * 3.0 - (6.0 / (r + 0.15)) - uTime * 1.6;
+                float n = snoise(vec3(cos(angle) * r * 4.0, sin(angle) * r * 4.0, uTime * 0.6));
+                float filaments = 0.5 + 0.5 * sin(spiral + n * 4.5);
+
+                // Chromatic split in the accretion ring
+                vec3 col = mix(uColorSecondary, uColorPrimary, filaments);
+                col += vec3(0.4, 0.7, 1.0) * uDispersion * 0.25 * sin(spiral * 1.5);
+                col += vec3(1.0) * (uCharge * 0.5 + uShockwave * 0.8);
+
+                float alpha = ringMask * (0.25 + 0.75 * pow(filaments, 1.5)) * 0.65;
+                gl_FragColor = vec4(col, alpha);
+            }
+        `;
+
+        /**
+         * 3. 48,000+ GPU-ACCELERATED INTERACTIVE PARTICLES SHADERS
+         */
+        const PARTICLE_VERTEX_SHADER = `
+            uniform float uTime;
+            uniform float uGravity;
+            uniform float uTurbulence;
+            uniform float uDispersion;
+            uniform float uCharge;
+            uniform float uShockwave;
+            uniform float uJetIntensity;
+            uniform float uOceanWave;
+            uniform float uPixelRatio;
+            uniform vec3 uCursorWorld;
+
+            attribute float aSize;
+            attribute float aPhase;
+            attribute float aColorMix;
+            attribute vec3 aOrbit; // x: radius, y: inclination/diskType, z: orbitalSpeed
+
+            varying float vColorMix;
+            varying float vAlpha;
+            varying float vDopplerShift;
+            varying float vShockGlow;
+
+            ${GLSL_NOISE_CHUNK}
+
+            void main() {
+                float radius = aOrbit.x;
+                float archetype = aOrbit.y; // 0..0.7: accretion disk, 0.7..0.9: outer halo, 0.9..1.0: polar jets
+                float speed = aOrbit.z;
+
+                // Gravitational contraction of orbital radii
+                float gravFactor = clamp(1.35 / max(0.35, pow(uGravity, 0.55)), 0.42, 2.2);
+                float activeRadius = radius * gravFactor;
+
+                // Singularity charge pulls particles dramatically inward and accelerates spin
+                float chargeCollapse = 1.0 - uCharge * 0.68 * smoothstep(22.0, 1.5, activeRadius);
+                activeRadius *= chargeCollapse;
+
+                // Keplerian angular velocity (inner particles orbit much faster)
+                float keplerSpeed = speed * (4.2 / pow(max(0.8, activeRadius), 0.72)) * (1.0 + uCharge * 2.2);
+                float theta = aPhase + uTime * keplerSpeed;
+
+                vec3 pos = vec3(0.0);
+
+                if (archetype < 0.72) {
+                    // Main Accretion Disk & Spiral Arms
+                    float diskThickness = (0.12 + 0.28 * (activeRadius / 18.0)) * (1.0 + uTurbulence * 0.4);
+                    float verticalWave = sin(theta * 3.0 + activeRadius * 0.6 - uTime * 1.5) * diskThickness;
+
+                    // Solaris Ocean mode flattens and creates concentric harmonic waves
+                    float solarisRipple = sin(activeRadius * 1.4 - uTime * 2.6 + cos(theta * 4.0)) * 0.85 * uOceanWave;
+
+                    pos.x = cos(theta) * activeRadius;
+                    pos.z = sin(theta) * activeRadius;
+                    pos.y = (verticalWave * (aColorMix - 0.5) * 2.5) + solarisRipple;
+                } else if (archetype < 0.90) {
+                    // Spherical Quantum Halo / Nebula Cloud
+                    float phi = aPhase * 3.14159 + sin(uTime * 0.3 + aColorMix * 6.28) * 0.5;
+                    pos.x = activeRadius * sin(phi) * cos(theta * 0.6);
+                    pos.y = activeRadius * cos(phi) * 0.75;
+                    pos.z = activeRadius * sin(phi) * sin(theta * 0.6);
+                } else {
+                    // Relativistic Polar Jets (prominent in Event Horizon epoch)
+                    float jetSign = (aColorMix > 0.5) ? 1.0 : -1.0;
+                    float jetProgress = fract(aPhase * 0.159 + uTime * (0.45 + uJetIntensity * 0.65));
+                    float jetHeight = (1.6 + jetProgress * 18.0) * (0.4 + uJetIntensity * 0.95);
+                    float jetCone = (0.15 + jetProgress * 1.8) * (1.2 - uJetIntensity * 0.35);
+
+                    pos.x = cos(theta * 4.0) * jetCone;
+                    pos.z = sin(theta * 4.0) * jetCone;
+                    pos.y = jetSign * jetHeight;
+                }
+
+                // 3D Curl Noise Turbulence displacement
+                vec3 curl = curlField(pos * 0.14, uTime * 0.85);
+                pos += curl * (uTurbulence * 1.35 * smoothstep(1.2, 10.0, activeRadius));
+
+                // Relativistic Shockwave ring expanding from core
+                float distFromCenter = length(pos);
+                float waveRadius = uShockwave * 24.0;
+                float waveBand = exp(-pow((distFromCenter - waveRadius) * 0.65, 2.0)) * step(0.001, uShockwave) * (1.0 - uShockwave);
+                pos += normalize(pos + vec3(0.0001)) * waveBand * 4.5;
+
+                // Interactive Cursor Space-Time Warping (Lensing & Attraction/Repulsion)
+                vec3 toCursor = pos - uCursorWorld;
+                float cursorDist = length(toCursor);
+                float warpZone = smoothstep(7.5, 0.0, cursorDist);
+                if (warpZone > 0.001) {
+                    vec3 dir = normalize(toCursor + vec3(0.0001));
+                    // Tangential swirl around the cursor + gravitational lens bend
+                    vec3 swirl = cross(dir, vec3(0.0, 1.0, 0.2));
+                    float pullOrPush = mix(1.4, -2.2, uCharge); // Push/lens normally, pull inward when charging
+                    pos += (dir * pullOrPush + swirl * 1.65) * warpZone;
+                }
+
+                vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                gl_Position = projectionMatrix * mvPosition;
+
+                // Perspective point size attenuation
+                float sizeBoost = 1.0 + waveBand * 2.2 + warpZone * 0.8 + uCharge * 0.4;
+                gl_PointSize = clamp((aSize * sizeBoost * uPixelRatio * 28.0) / max(1.0, -mvPosition.z), 1.0, 26.0);
+
+                // Pass varyings to fragment shader
+                vColorMix = aColorMix;
+                vDopplerShift = sin(theta) * 0.5 + 0.5 + warpZone * 0.5;
+                vShockGlow = waveBand + uCharge * smoothstep(8.0, 1.0, distFromCenter) * 0.7;
+
+                // Smooth distance fade
+                float radialFade = smoothstep(26.0, 8.0, distFromCenter);
+                vAlpha = clamp(radialFade * (0.55 + 0.45 * sin(aPhase + uTime * 2.0)), 0.12, 0.98);
+            }
+        `;
+
+        const PARTICLE_FRAGMENT_SHADER = `
+            uniform vec3 uParticleInner;
+            uniform vec3 uParticleOuter;
+            uniform float uDispersion;
+
+            varying float vColorMix;
+            varying float vAlpha;
+            varying float vDopplerShift;
+            varying float vShockGlow;
+
+            void main() {
+                // Soft radial photon glow sprite
+                vec2 uv = gl_PointCoord.xy - 0.5;
+                float d = length(uv);
+                if (d > 0.5) discard;
+
+                float coreGlow = exp(-d * d * 18.0);
+                float haloGlow = pow(max(0.0, 1.0 - d * 2.0), 2.2);
+
+                // Spectral color mix + relativistic Doppler chromatic shift
+                vec3 baseColor = mix(uParticleInner, uParticleOuter, vColorMix);
+
+                // Chromatic dispersion shift towards cyan/violet or gold/crimson
+                vec3 dispersionTint = vec3(
+                    0.5 + 0.5 * sin(vDopplerShift * 6.28 + 0.0),
+                    0.5 + 0.5 * sin(vDopplerShift * 6.28 + 2.09),
+                    0.5 + 0.5 * sin(vDopplerShift * 6.28 + 4.18)
+                );
+
+                vec3 finalColor = mix(baseColor, dispersionTint * 1.35, uDispersion * 0.42);
+                finalColor += vec3(1.0, 0.96, 0.9) * (coreGlow * 0.65 + vShockGlow * 0.85);
+
+                float alpha = (coreGlow * 0.85 + haloGlow * 0.45) * vAlpha;
+                gl_FragColor = vec4(finalColor, alpha);
+            }
+        `;
+
+        /**
+         * ==========================================================================
+         * PROCEDURAL WEB AUDIO SYNTHESIZER (SYNESTHESIA ENGINE)
+         * ==========================================================================
+         */
+        class SynesthesiaAudioEngine {
+            constructor() {
+                this.ctx = null;
+                this.isInitialized = false;
+                this.isMuted = false;
+                this.masterGain = null;
+                this.analyser = null;
+                this.freqData = null;
+
+                // Oscillators & Filters
+                this.droneOsc1 = null;
+                this.droneOsc2 = null;
+                this.subOsc = null;
+                this.mainFilter = null;
+                this.convolver = null;
+                this.currentBaseFreq = 110.0;
+                this.targetBaseFreq = 110.0;
+                this.dominantFreqReadout = 110.0;
+                this.currentEpochIndex = 0;
+                this.chimeTimer = null;
+            }
+
+            init() {
+                if (this.isInitialized) return;
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+
+                    // Master Gain & Analyser
+                    this.masterGain = this.ctx.createGain();
+                    this.masterGain.gain.setValueAtTime(0.01, this.ctx.currentTime);
+                    this.masterGain.gain.exponentialRampToValueAtTime(0.42, this.ctx.currentTime + 2.5);
+
+                    this.analyser = this.ctx.createAnalyser();
+                    this.analyser.fftSize = 128;
+                    this.analyser.smoothingTimeConstant = 0.84;
+                    this.freqData = new Uint8Array(this.analyser.frequencyBinCount);
+
+                    // Create Lush Cosmic Convolution Reverb Impulse
+                    this.convolver = this.ctx.createConvolver();
+                    this.convolver.buffer = this.createCosmicImpulseBuffer(4.2, 2.4);
+
+                    const dryGain = this.ctx.createGain();
+                    const wetGain = this.ctx.createGain();
+                    dryGain.gain.value = 0.55;
+                    wetGain.gain.value = 0.65;
+
+                    // Stereo Feedback Delay Network
+                    this.delayNode = this.ctx.createDelay(2.0);
+                    this.delayNode.delayTime.value = 0.42;
+                    const delayFeedback = this.ctx.createGain();
+                    delayFeedback.gain.value = 0.38;
+                    this.delayNode.connect(delayFeedback);
+                    delayFeedback.connect(this.delayNode);
+
+                    // Dynamic Low-Pass Filter controlled by Physics & Cursor
+                    this.mainFilter = this.ctx.createBiquadFilter();
+                    this.mainFilter.type = 'lowpass';
+                    this.mainFilter.frequency.value = 340;
+                    this.mainFilter.Q.value = 3.2;
+
+                    // Multi-layered Detuned Drone Oscillators
+                    this.droneOsc1 = this.ctx.createOscillator();
+                    this.droneOsc2 = this.ctx.createOscillator();
+                    this.subOsc = this.ctx.createOscillator();
+
+                    this.droneOsc1.type = 'sawtooth';
+                    this.droneOsc2.type = 'triangle';
+                    this.subOsc.type = 'sine';
+
+                    this.droneOsc1.frequency.value = this.currentBaseFreq;
+                    this.droneOsc2.frequency.value = this.currentBaseFreq * 1.502; // Fifth interval with slight detune
+                    this.subOsc.frequency.value = this.currentBaseFreq * 0.5;     // Sub-octave
+
+                    const droneGain1 = this.ctx.createGain();
+                    const droneGain2 = this.ctx.createGain();
+                    const subGain = this.ctx.createGain();
+
+                    droneGain1.gain.value = 0.16;
+                    droneGain2.gain.value = 0.18;
+                    subGain.gain.value = 0.28;
+
+                    this.droneOsc1.connect(droneGain1);
+                    this.droneOsc2.connect(droneGain2);
+                    this.subOsc.connect(subGain);
+
+                    droneGain1.connect(this.mainFilter);
+                    droneGain2.connect(this.mainFilter);
+                    subGain.connect(this.mainFilter);
+
+                    // Connect Filter -> Dry & Reverb & Delay -> Master -> Analyser -> Destination
+                    this.mainFilter.connect(dryGain);
+                    this.mainFilter.connect(this.convolver);
+                    this.mainFilter.connect(this.delayNode);
+                    this.delayNode.connect(this.convolver);
+                    this.convolver.connect(wetGain);
+
+                    dryGain.connect(this.masterGain);
+                    wetGain.connect(this.masterGain);
+                    this.masterGain.connect(this.analyser);
+                    this.analyser.connect(this.ctx.destination);
+
+                    this.droneOsc1.start();
+                    this.droneOsc2.start();
+                    this.subOsc.start();
+
+                    this.isInitialized = true;
+
+                    // Play welcome harmonic chord
+                    this.triggerCrystallineChime(true);
+
+                    // Schedule generative ambient pentatonic chimes
+                    this.chimeTimer = setInterval(() => {
+                        if (!this.isMuted && Math.random() < 0.65) {
+                            this.triggerCrystallineChime(false);
+                        }
+                    }, 3400);
+                } catch (err) {
+                    console.warn("Web Audio initialization deferred:", err);
+                }
+            }
+
+            createCosmicImpulseBuffer(duration, decay) {
+                const sampleRate = this.ctx.sampleRate;
+                const length = sampleRate * duration;
+                const impulse = this.ctx.createBuffer(2, length, sampleRate);
+                for (let ch = 0; ch < 2; ch++) {
+                    const channelData = impulse.getChannelData(ch);
+                    for (let i = 0; i < length; i++) {
+                        const env = Math.pow(1 - i / length, decay);
+                        channelData[i] = (Math.random() * 2 - 1) * env * 0.5;
+                    }
+                }
+                return impulse;
+            }
+
+            update(cursorNormY, turbulence, charge, timeScale, epochIdx) {
+                this.currentEpochIndex = epochIdx;
+                this.targetBaseFreq = EPOCHS[epochIdx].baseFreq;
+                this.currentBaseFreq += (this.targetBaseFreq - this.currentBaseFreq) * 0.04;
+
+                // Pitch bend up during singularity charge + time dilation modulation
+                const pitchBend = 1.0 + charge * 0.55 + (timeScale - 1.0) * 0.08;
+                const effectiveFreq = this.currentBaseFreq * pitchBend;
+                this.dominantFreqReadout = effectiveFreq;
+
+                if (!this.isInitialized || this.isMuted) return;
+
+                const now = this.ctx.currentTime;
+                this.droneOsc1.frequency.setTargetAtTime(effectiveFreq, now, 0.08);
+                this.droneOsc2.frequency.setTargetAtTime(effectiveFreq * 1.498, now, 0.08);
+                this.subOsc.frequency.setTargetAtTime(effectiveFreq * 0.5, now, 0.08);
+
+                // Dynamic filter frequency controlled by Mouse Y, Turbulence & Singularity Charge
+                const yMod = (1.0 - (cursorNormY * 0.5 + 0.5)); // 0 at bottom, 1 at top
+                const targetFilterFreq = 160 + yMod * 720 + turbulence * 280 + charge * 1400;
+                this.mainFilter.frequency.setTargetAtTime(Math.min(3800, targetFilterFreq), now, 0.1);
+                this.mainFilter.Q.setTargetAtTime(2.5 + charge * 8.0, now, 0.1);
+            }
+
+            triggerCrystallineChime(isChord = false) {
+                if (!this.isInitialized || this.isMuted) return;
+
+                const epoch = EPOCHS[this.currentEpochIndex];
+                const intervals = epoch.scaleIntervals;
+                const notesCount = isChord ? 3 : 1;
+                const now = this.ctx.currentTime;
+
+                for (let i = 0; i < notesCount; i++) {
+                    const semitone = intervals[Math.floor(Math.random() * intervals.length)];
+                    const noteFreq = this.currentBaseFreq * 2.0 * Math.pow(2, semitone / 12);
+
+                    const carrier = this.ctx.createOscillator();
+                    const modulator = this.ctx.createOscillator();
+                    const modGain = this.ctx.createGain();
+                    const envGain = this.ctx.createGain();
+
+                    carrier.type = 'sine';
+                    modulator.type = 'sine';
+
+                    carrier.frequency.setValueAtTime(noteFreq, now + i * 0.09);
+                    modulator.frequency.setValueAtTime(noteFreq * 2.0, now + i * 0.09);
+
+                    modGain.gain.setValueAtTime(noteFreq * 1.4, now + i * 0.09);
+                    modGain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.09 + 2.2);
+
+                    envGain.gain.setValueAtTime(0.001, now + i * 0.09);
+                    envGain.gain.linearRampToValueAtTime(0.09 / notesCount, now + i * 0.09 + 0.04);
+                    envGain.gain.exponentialRampToValueAtTime(0.0008, now + i * 0.09 + 3.6);
+
+                    modulator.connect(modGain);
+                    modGain.connect(carrier.frequency);
+                    carrier.connect(envGain);
+
+                    envGain.connect(this.convolver);
+                    envGain.connect(this.masterGain);
+
+                    carrier.start(now + i * 0.09);
+                    modulator.start(now + i * 0.09);
+                    carrier.stop(now + i * 0.09 + 3.8);
+                    modulator.stop(now + i * 0.09 + 3.8);
+                }
+            }
+
+            triggerShutterSound() {
+                if (!this.isInitialized || this.isMuted) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(1400, now);
+                osc.frequency.exponentialRampToValueAtTime(220, now + 0.09);
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start(now);
+                osc.stop(now + 0.13);
+            }
+
+            toggleMute() {
+                if (!this.isInitialized) {
+                    this.init();
+                    return false;
+                }
+                this.isMuted = !this.isMuted;
+                const now = this.ctx.currentTime;
+                if (this.isMuted) {
+                    this.masterGain.gain.setTargetAtTime(0.0001, now, 0.15);
+                } else {
+                    if (this.ctx.state === 'suspended') this.ctx.resume();
+                    this.masterGain.gain.setTargetAtTime(0.42, now, 0.2);
+                }
+                return this.isMuted;
+            }
+        }
+
+        /**
+         * ==========================================================================
+         * MAIN APPLICATION CONTROLLER & WEBGL SCENE
+         * ==========================================================================
+         */
+        class AetherExperience {
+            constructor() {
+                this.container = document.getElementById('webgl-container');
+                this.PARTICLE_COUNT = 48000;
+                this.currentEpoch = 0;
+
+                // Physics & Optical State (smoothly interpolated)
+                this.state = {
+                    time: 0,
+                    gravity: 1.25,
+                    targetGravity: 1.25,
+                    dispersion: 0.65,
+                    targetDispersion: 0.65,
+                    turbulence: 0.80,
+                    targetTurbulence: 0.80,
+                    timeScale: 1.00,
+                    targetTimeScale: 1.00,
+                    jetIntensity: 0.25,
+                    targetJetIntensity: 0.25,
+                    oceanWave: 0.0,
+                    targetOceanWave: 0.0,
+                    charge: 0.0,
+                    isCharging: false,
+                    shockwave: 0.0,
+                    isShockwaveActive: false
+                };
+
+                // Interpolated Colors
+                this.colors = {
+                    corePrimary: EPOCHS[0].corePrimary.clone(),
+                    coreSecondary: EPOCHS[0].coreSecondary.clone(),
+                    coreDeep: EPOCHS[0].coreDeep.clone(),
+                    particleInner: EPOCHS[0].particleInner.clone(),
+                    particleOuter: EPOCHS[0].particleOuter.clone()
+                };
+
+                // Pointer & Camera Orbit State
+                this.pointer = {
+                    screenX: window.innerWidth / 2,
+                    screenY: window.innerHeight / 2,
+                    ringX: window.innerWidth / 2,
+                    ringY: window.innerHeight / 2,
+                    normX: 0,
+                    normY: 0,
+                    smoothNormX: 0,
+                    smoothNormY: 0,
+                    worldPos: new THREE.Vector3(0, 0, 0)
+                };
+
+                // Telemetry Tracking
+                this.lastFrameTime = performance.now();
+                this.frameCount = 0;
+                this.fps = 60;
+
+                // Audio Engine
+                this.audio = new SynesthesiaAudioEngine();
+
+                this.initThree();
+                this.buildCentralSingularity();
+                this.buildAccretionParticles();
+                this.bindEvents();
+                this.initSpectrumCanvas();
+            }
+
+            initThree() {
+                this.scene = new THREE.Scene();
+
+                this.camera = new THREE.PerspectiveCamera(
+                    55,
+                    window.innerWidth / window.innerHeight,
+                    0.1,
+                    150
+                );
+                this.camera.position.set(0, 4.2, 18.5);
+                this.camera.lookAt(0, 0, 0);
+
+                // preserveDrawingBuffer enabled for reliable high-res PNG frame capture
+                this.renderer = new THREE.WebGLRenderer({
+                    antialias: true,
+                    powerPreference: "high-performance",
+                    preserveDrawingBuffer: true
+                });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.setClearColor(0x020306, 1.0);
+                this.container.appendChild(this.renderer.domElement);
+            }
+
+            buildCentralSingularity() {
+                // 1. High-resolution Icosahedron Core for Ferrofluid Singularity
+                const coreGeo = new THREE.IcosahedronGeometry(2.15, 6);
+                this.coreUniforms = {
+                    uTime: { value: 0 },
+                    uGravity: { value: this.state.gravity },
+                    uTurbulence: { value: this.state.turbulence },
+                    uDispersion: { value: this.state.dispersion },
+                    uCharge: { value: 0 },
+                    uShockwave: { value: 0 },
+                    uOceanWave: { value: 0 },
+                    uCursorWorld: { value: new THREE.Vector3() },
+                    uColorPrimary: { value: this.colors.corePrimary },
+                    uColorSecondary: { value: this.colors.coreSecondary },
+                    uColorDeep: { value: this.colors.coreDeep }
+                };
+
+                const coreMat = new THREE.ShaderMaterial({
+                    vertexShader: CORE_VERTEX_SHADER,
+                    fragmentShader: CORE_FRAGMENT_SHADER,
+                    uniforms: this.coreUniforms,
+                    transparent: true
+                });
+
+                this.coreMesh = new THREE.Mesh(coreGeo, coreMat);
+                this.scene.add(this.coreMesh);
+
+                // 2. Relativistic Lensing Halo Plane
+                const haloGeo = new THREE.PlaneGeometry(11.5, 11.5, 1, 1);
+                this.haloUniforms = {
+                    uTime: { value: 0 },
+                    uCharge: { value: 0 },
+                    uShockwave: { value: 0 },
+                    uDispersion: { value: this.state.dispersion },
+                    uColorPrimary: { value: this.colors.corePrimary },
+                    uColorSecondary: { value: this.colors.coreSecondary }
+                };
+
+                const haloMat = new THREE.ShaderMaterial({
+                    vertexShader: HALO_VERTEX_SHADER,
+                    fragmentShader: HALO_FRAGMENT_SHADER,
+                    uniforms: this.haloUniforms,
+                    transparent: true,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending,
+                    side: THREE.DoubleSide
+                });
+
+                this.haloMesh = new THREE.Mesh(haloGeo, haloMat);
+                this.haloMesh.rotation.x = Math.PI * 0.42;
+                this.scene.add(this.haloMesh);
+            }
+
+            buildAccretionParticles() {
+                const geometry = new THREE.BufferGeometry();
+
+                const positions = new Float32Array(this.PARTICLE_COUNT * 3);
+                const sizes = new Float32Array(this.PARTICLE_COUNT);
+                const phases = new Float32Array(this.PARTICLE_COUNT);
+                const colorMixes = new Float32Array(this.PARTICLE_COUNT);
+                const orbits = new Float32Array(this.PARTICLE_COUNT * 3);
+
+                for (let i = 0; i < this.PARTICLE_COUNT; i++) {
+                    // Exponential distribution so more particles cluster near the luminous inner rim
+                    const randPow = Math.pow(Math.random(), 1.55);
+                    const radius = 2.45 + randPow * 21.5;
+                    const archetype = Math.random();
+                    const orbitalSpeed = (0.35 + Math.random() * 0.65) * (Math.random() < 0.92 ? 1.0 : -0.6);
+
+                    const phase = Math.random() * Math.PI * 2;
+                    positions[i * 3] = Math.cos(phase) * radius;
+                    positions[i * 3 + 1] = (Math.random() - 0.5) * 2.0;
+                    positions[i * 3 + 2] = Math.sin(phase) * radius;
+
+                    sizes[i] = 0.45 + Math.pow(Math.random(), 2.4) * 2.3;
+                    phases[i] = phase;
+                    colorMixes[i] = Math.random();
+
+                    orbits[i * 3] = radius;
+                    orbits[i * 3 + 1] = archetype;
+                    orbits[i * 3 + 2] = orbitalSpeed;
+                }
+
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
+                geometry.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1));
+                geometry.setAttribute('aColorMix', new THREE.BufferAttribute(colorMixes, 1));
+                geometry.setAttribute('aOrbit', new THREE.BufferAttribute(orbits, 3));
+
+                this.particleUniforms = {
+                    uTime: { value: 0 },
+                    uGravity: { value: this.state.gravity },
+                    uTurbulence: { value: this.state.turbulence },
+                    uDispersion: { value: this.state.dispersion },
+                    uCharge: { value: 0 },
+                    uShockwave: { value: 0 },
+                    uJetIntensity: { value: this.state.jetIntensity },
+                    uOceanWave: { value: this.state.oceanWave },
+                    uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+                    uCursorWorld: { value: new THREE.Vector3() },
+                    uParticleInner: { value: this.colors.particleInner },
+                    uParticleOuter: { value: this.colors.particleOuter }
+                };
+
+                const material = new THREE.ShaderMaterial({
+                    vertexShader: PARTICLE_VERTEX_SHADER,
+                    fragmentShader: PARTICLE_FRAGMENT_SHADER,
+                    uniforms: this.particleUniforms,
+                    transparent: true,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending
+                });
+
+                this.particleSystem = new THREE.Points(geometry, material);
+                this.scene.add(this.particleSystem);
+            }
+
+            switchEpoch(index) {
+                if (index < 0 || index >= EPOCHS.length) return;
+                this.currentEpoch = index;
+                const preset = EPOCHS[index];
+
+                // Update CSS Accent Variables
+                document.documentElement.style.setProperty('--accent', preset.accentHex);
+                document.documentElement.style.setProperty('--accent-glow', preset.accentGlow);
+
+                // Update Top Poetic Micro-copy & Status Dot
+                const subEl = document.getElementById('epoch-poetic-subtitle');
+                subEl.style.opacity = '0';
+                setTimeout(() => {
+                    subEl.textContent = preset.subtitle;
+                    subEl.style.opacity = '1';
+                }, 260);
+
+                const dot = document.getElementById('core-status-dot');
+                dot.style.backgroundColor = preset.accentHex;
+                dot.style.boxShadow = `0 0 12px ${preset.accentHex}`;
+
+                // Update Target Physics Parameters & Sync Sliders
+                this.state.targetGravity = preset.gravity;
+                this.state.targetDispersion = preset.dispersion;
+                this.state.targetTurbulence = preset.turbulence;
+                this.state.targetTimeScale = preset.timeScale;
+                this.state.targetJetIntensity = preset.jetIntensity;
+                this.state.targetOceanWave = preset.oceanWaveMode;
+
+                this.syncSlidersUI(
+                    preset.gravity,
+                    preset.dispersion,
+                    preset.turbulence,
+                    preset.timeScale
+                );
+
+                // Update Active Epoch Button UI
+                document.querySelectorAll('.epoch-btn').forEach((btn, idx) => {
+                    btn.classList.toggle('active', idx === index);
+                });
+
+                // Trigger subtle harmonic wave & audio chime
+                this.triggerRelativisticShockwave(0.45);
+                this.audio.triggerCrystallineChime(true);
+            }
+
+            syncSlidersUI(grav, disp, turb, time) {
+                document.getElementById('slider-gravity').value = grav;
+                document.getElementById('val-gravity').textContent = `${grav.toFixed(2)} G`;
+
+                document.getElementById('slider-dispersion').value = disp;
+                document.getElementById('val-dispersion').textContent = `${disp.toFixed(2)} λ`;
+
+                document.getElementById('slider-turbulence').value = turb;
+                document.getElementById('val-turbulence').textContent = `${turb.toFixed(2)} Ω`;
+
+                document.getElementById('slider-time').value = time;
+                document.getElementById('val-time').textContent = `${time.toFixed(2)}x`;
+            }
+
+            triggerRelativisticShockwave(initialStrength = 0.01) {
+                this.state.isShockwaveActive = true;
+                this.state.shockwave = initialStrength;
+                this.audio.triggerCrystallineChime(true);
+            }
+
+            captureHighResFrame() {
+                // Flash shutter effect & play shutter audio
+                const flash = document.getElementById('shutter-flash');
+                flash.style.opacity = '0.75';
+                setTimeout(() => { flash.style.opacity = '0'; }, 120);
+                this.audio.triggerShutterSound();
+
+                // Render fresh frame and download PNG
+                this.renderer.render(this.scene, this.camera);
+                const dataURL = this.renderer.domElement.toDataURL('image/png');
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+                link.download = `AETHER-OPTIKA-VREMENI-${timestamp}.png`;
+                link.href = dataURL;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Show toast notification
+                const toast = document.getElementById('toast-notification');
+                toast.style.opacity = '1';
+                toast.style.transform = 'translate(-50%, 0)';
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translate(-50%, -12px)';
+                }, 2800);
+            }
+
+            initSpectrumCanvas() {
+                this.specCanvas = document.getElementById('audio-spectrum-canvas');
+                this.specCtx = this.specCanvas.getContext('2d');
+            }
+
+            drawSpectrum(time) {
+                const ctx = this.specCtx;
+                const w = this.specCanvas.width;
+                const h = this.specCanvas.height;
+                ctx.clearRect(0, 0, w, h);
+
+                const bars = 16;
+                const barWidth = 3;
+                const gap = (w - bars * barWidth) / (bars - 1);
+                const accent = EPOCHS[this.currentEpoch].accentHex;
+
+                if (this.audio.isInitialized && !this.audio.isMuted && this.audio.analyser) {
+                    this.audio.analyser.getByteFrequencyData(this.audio.freqData);
+                }
+
+                for (let i = 0; i < bars; i++) {
+                    let normVal = 0.12;
+                    if (this.audio.isInitialized && !this.audio.isMuted && this.audio.freqData) {
+                        const val = this.audio.freqData[i * 2] / 255.0;
+                        normVal = Math.max(0.12, val * 0.92 + Math.sin(time * 4.0 + i * 0.5) * 0.08 * (1 + this.state.charge));
+                    } else {
+                        normVal = 0.12 + 0.06 * Math.sin(time * 2.0 + i * 0.4);
+                    }
+
+                    const barH = Math.max(3, normVal * h);
+                    const x = i * (barWidth + gap);
+                    const y = (h - barH) / 2;
+
+                    ctx.fillStyle = i % 3 === 0 ? accent : 'rgba(255, 255, 255, 0.65)';
+                    ctx.beginPath();
+                    ctx.roundRect(x, y, barWidth, barH, 1.5);
+                    ctx.fill();
+                }
+            }
+
+            bindEvents() {
+                // Window Resize
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                    this.particleUniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
+                });
+
+                // Pointer Movement
+                const updatePointer = (clientX, clientY) => {
+                    this.pointer.screenX = clientX;
+                    this.pointer.screenY = clientY;
+                    this.pointer.normX = (clientX / window.innerWidth) * 2 - 1;
+                    this.pointer.normY = -(clientY / window.innerHeight) * 2 + 1;
+                };
+
+                window.addEventListener('mousemove', (e) => {
+                    updatePointer(e.clientX, e.clientY);
+                });
+
+                window.addEventListener('touchmove', (e) => {
+                    if (e.touches.length > 0) {
+                        updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+                    }
+                }, { passive: true });
+
+                // Singularity Charge on Canvas Hold & Shockwave on Release
+                const startCharge = (e) => {
+                    // Ignore clicks on UI controls
+                    if (e.target.closest('.glass-panel') || e.target.closest('#entry-overlay') || e.target.closest('#zen-exit-pill')) return;
+                    this.state.isCharging = true;
+                    document.getElementById('cursor-label').style.opacity = '1';
+                    const badge = document.getElementById('telemetry-state-badge');
+                    badge.textContent = 'КОЛЛАПС СИНГУЛЯРНОСТИ';
+                    badge.className = 'font-mono-tech text-[9px] px-2 py-0.5 rounded bg-amber-500/25 text-amber-300 uppercase tracking-widest animate-pulse';
+                };
+
+                const releaseCharge = () => {
+                    if (!this.state.isCharging) return;
+                    this.state.isCharging = false;
+                    document.getElementById('cursor-label').style.opacity = '0';
+                    const badge = document.getElementById('telemetry-state-badge');
+                    badge.textContent = 'РЕЛЯТИВИСТСКИЙ ВЫБРОС';
+                    badge.className = 'font-mono-tech text-[9px] px-2 py-0.5 rounded bg-sky-500/25 text-sky-300 uppercase tracking-widest';
+
+                    if (this.state.charge > 0.12) {
+                        this.triggerRelativisticShockwave(0.01);
+                    }
+                    setTimeout(() => {
+                        if (!this.state.isCharging) {
+                            badge.textContent = 'СТАБИЛЬНО';
+                            badge.className = 'font-mono-tech text-[9px] px-2 py-0.5 rounded bg-white/10 text-amber-300 uppercase tracking-widest';
+                        }
+                    }, 1400);
+                };
+
+                window.addEventListener('mousedown', startCharge);
+                window.addEventListener('mouseup', releaseCharge);
+                window.addEventListener('touchstart', (e) => {
+                    if (e.touches.length > 0) {
+                        updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+                    }
+                    startCharge(e);
+                }, { passive: true });
+                window.addEventListener('touchend', releaseCharge);
+
+                // Entry Screen Initialization
+                document.getElementById('init-experience-btn').addEventListener('click', () => {
+                    this.audio.init();
+                    const overlay = document.getElementById('entry-overlay');
+                    overlay.style.opacity = '0';
+                    overlay.style.pointerEvents = 'none';
+                    this.triggerRelativisticShockwave(0.01);
+                    setTimeout(() => overlay.remove(), 1000);
+                });
+
+                // Epoch Buttons
+                document.querySelectorAll('.epoch-btn').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const idx = parseInt(btn.getAttribute('data-epoch'), 10);
+                        this.switchEpoch(idx);
+                    });
+                });
+
+                // Live Sliders
+                document.getElementById('slider-gravity').addEventListener('input', (e) => {
+                    const v = parseFloat(e.target.value);
+                    this.state.targetGravity = v;
+                    document.getElementById('val-gravity').textContent = `${v.toFixed(2)} G`;
+                });
+
+                document.getElementById('slider-dispersion').addEventListener('input', (e) => {
+                    const v = parseFloat(e.target.value);
+                    this.state.targetDispersion = v;
+                    document.getElementById('val-dispersion').textContent = `${v.toFixed(2)} λ`;
+                });
+
+                document.getElementById('slider-turbulence').addEventListener('input', (e) => {
+                    const v = parseFloat(e.target.value);
+                    this.state.targetTurbulence = v;
+                    document.getElementById('val-turbulence').textContent = `${v.toFixed(2)} Ω`;
+                });
+
+                document.getElementById('slider-time').addEventListener('input', (e) => {
+                    const v = parseFloat(e.target.value);
+                    this.state.targetTimeScale = v;
+                    document.getElementById('val-time').textContent = `${v.toFixed(2)}x`;
+                });
+
+                // Reset Preset Params
+                document.getElementById('reset-params-btn').addEventListener('click', () => {
+                    this.switchEpoch(this.currentEpoch);
+                });
+
+                // Collapse Control Deck
+                let deckCollapsed = false;
+                document.getElementById('deck-header').addEventListener('click', () => {
+                    deckCollapsed = !deckCollapsed;
+                    const body = document.getElementById('deck-body');
+                    const icon = document.getElementById('collapse-icon');
+                    if (deckCollapsed) {
+                        body.style.maxHeight = '0px';
+                        body.style.paddingTop = '0px';
+                        body.style.paddingBottom = '0px';
+                        body.style.opacity = '0';
+                        icon.style.transform = 'rotate(180deg)';
+                    } else {
+                        body.style.maxHeight = '420px';
+                        body.style.paddingTop = '1.25rem';
+                        body.style.paddingBottom = '1.25rem';
+                        body.style.opacity = '1';
+                        icon.style.transform = 'rotate(0deg)';
+                    }
+                });
+
+                // Audio Mute Toggle
+                document.getElementById('audio-toggle-btn').addEventListener('click', () => {
+                    const muted = this.audio.toggleMute();
+                    const textEl = document.getElementById('audio-toggle-text');
+                    const dotEl = document.getElementById('audio-indicator-dot');
+                    if (muted) {
+                        textEl.textContent = 'ЗВУК: ВЫКЛ';
+                        dotEl.className = 'w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_8px_#fb7185]';
+                    } else {
+                        textEl.textContent = 'ЗВУК: ВКЛ';
+                        dotEl.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]';
+                    }
+                });
+
+                // Trigger Shockwave Button
+                document.getElementById('trigger-shockwave-btn').addEventListener('click', () => {
+                    this.triggerRelativisticShockwave(0.01);
+                });
+
+                // Frame Capture Button
+                document.getElementById('capture-frame-btn').addEventListener('click', () => {
+                    this.captureHighResFrame();
+                });
+
+                // Zen Mode Toggle & Hotkeys
+                const toggleZen = () => {
+                    document.body.classList.toggle('zen-mode');
+                };
+                document.getElementById('zen-mode-btn').addEventListener('click', toggleZen);
+                document.getElementById('zen-exit-pill').addEventListener('click', toggleZen);
+
+                window.addEventListener('keydown', (e) => {
+                    if (e.key === 'h' || e.key === 'H' || e.key === 'р' || e.key === 'Р') {
+                        toggleZen();
+                    } else if (e.code === 'Space') {
+                        e.preventDefault();
+                        this.triggerRelativisticShockwave(0.01);
+                    } else if (['1', '2', '3', '4'].includes(e.key)) {
+                        this.switchEpoch(parseInt(e.key, 10) - 1);
+                    }
+                });
+            }
+
+            updateCursorAndTelemetry() {
+                // Smooth inertia cursor ring
+                this.pointer.ringX += (this.pointer.screenX - this.pointer.ringX) * 0.18;
+                this.pointer.ringY += (this.pointer.screenY - this.pointer.ringY) * 0.18;
+
+                const dotEl = document.getElementById('cursor-dot');
+                const ringEl = document.getElementById('cursor-ring');
+                const labelEl = document.getElementById('cursor-label');
+                const chargeCircle = document.getElementById('cursor-charge-circle');
+
+                dotEl.style.transform = `translate3d(${this.pointer.screenX}px, ${this.pointer.screenY}px, 0) scale(${1 + this.state.charge * 0.8})`;
+                ringEl.style.transform = `translate3d(${this.pointer.ringX}px, ${this.pointer.ringY}px, 0) scale(${1 - this.state.charge * 0.25})`;
+                labelEl.style.transform = `translate3d(${this.pointer.ringX}px, ${this.pointer.ringY}px, 0)`;
+
+                // Update SVG circle progress for singularity charge
+                const circumference = 113.1;
+                chargeCircle.style.strokeDashoffset = (circumference * (1.0 - this.state.charge)).toFixed(1);
+
+                // Update Telemetry DOM every 6 frames for crisp readability
+                if (this.frameCount % 6 === 0) {
+                    document.getElementById('tel-fps').textContent = this.fps;
+                    const entropy = (0.25 + this.state.turbulence * 0.35 + this.state.charge * 0.45 + Math.sin(this.state.time) * 0.02).toFixed(3);
+                    document.getElementById('tel-entropy').textContent = entropy;
+
+                    const relativisticGamma = (this.state.timeScale / Math.sqrt(Math.max(0.12, 1.0 - this.state.charge * 0.75))).toFixed(3);
+                    document.getElementById('tel-dilation').textContent = relativisticGamma;
+
+                    const signX = this.pointer.normX >= 0 ? '+' : '';
+                    const signY = this.pointer.normY >= 0 ? '+' : '';
+                    document.getElementById('tel-coords').textContent = `${signX}${this.pointer.normX.toFixed(2)}, ${signY}${this.pointer.normY.toFixed(2)}`;
+                    document.getElementById('tel-freq').textContent = this.audio.dominantFreqReadout.toFixed(1);
+                }
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+
+                const now = performance.now();
+                const dt = Math.min((now - this.lastFrameTime) / 1000, 0.1);
+                this.lastFrameTime = now;
+                this.frameCount++;
+
+                if (this.frameCount % 15 === 0) {
+                    this.fps = Math.min(60, Math.round(1 / Math.max(0.008, dt)));
+                }
+
+                // 1. Smoothly Interpolate Parameters & Epoch Colors
+                const lerpSpeed = 0.045;
+                this.state.gravity += (this.state.targetGravity - this.state.gravity) * lerpSpeed;
+                this.state.dispersion += (this.state.targetDispersion - this.state.dispersion) * lerpSpeed;
+                this.state.turbulence += (this.state.targetTurbulence - this.state.turbulence) * lerpSpeed;
+                this.state.timeScale += (this.state.targetTimeScale - this.state.timeScale) * lerpSpeed;
+                this.state.jetIntensity += (this.state.targetJetIntensity - this.state.jetIntensity) * lerpSpeed;
+                this.state.oceanWave += (this.state.targetOceanWave - this.state.oceanWave) * lerpSpeed;
+
+                const targetEpoch = EPOCHS[this.currentEpoch];
+                this.colors.corePrimary.lerp(targetEpoch.corePrimary, lerpSpeed);
+                this.colors.coreSecondary.lerp(targetEpoch.coreSecondary, lerpSpeed);
+                this.colors.coreDeep.lerp(targetEpoch.coreDeep, lerpSpeed);
+                this.colors.particleInner.lerp(targetEpoch.particleInner, lerpSpeed);
+                this.colors.particleOuter.lerp(targetEpoch.particleOuter, lerpSpeed);
+
+                // 2. Singularity Charge & Relativistic Shockwave Progression
+                if (this.state.isCharging) {
+                    this.state.charge = Math.min(1.0, this.state.charge + dt * 0.75);
+                } else {
+                    this.state.charge = Math.max(0.0, this.state.charge - dt * 2.2);
+                }
+
+                if (this.state.isShockwaveActive) {
+                    this.state.shockwave += dt * 0.72;
+                    if (this.state.shockwave >= 1.0) {
+                        this.state.shockwave = 0.0;
+                        this.state.isShockwaveActive = false;
+                    }
+                }
+
+                // 3. Advance Relativistic Simulation Time
+                this.state.time += dt * this.state.timeScale;
+
+                // 4. Smooth Camera Orbital Parallax & Cursor 3D Projection
+                this.pointer.smoothNormX += (this.pointer.normX - this.pointer.smoothNormX) * 0.05;
+                this.pointer.smoothNormY += (this.pointer.normY - this.pointer.smoothNormY) * 0.05;
+
+                const camAngle = this.pointer.smoothNormX * 0.65 + Math.sin(this.state.time * 0.12) * 0.25;
+                const camHeight = 4.2 + this.pointer.smoothNormY * 3.8 + Math.cos(this.state.time * 0.15) * 0.8;
+                const camDist = 18.5 - this.state.charge * 3.2;
+
+                this.camera.position.x = Math.sin(camAngle) * camDist;
+                this.camera.position.z = Math.cos(camAngle) * camDist;
+                this.camera.position.y = camHeight;
+                this.camera.lookAt(0, 0, 0);
+
+                // Project cursor into 3D space plane near the core
+                this.pointer.worldPos.set(
+                    this.pointer.smoothNormX * 11.5,
+                    this.pointer.smoothNormY * 7.5,
+                    2.0
+                ).applyAxisAngle(new THREE.Vector3(0, 1, 0), camAngle);
+
+                // 5. Update Shader Uniforms
+                this.coreUniforms.uTime.value = this.state.time;
+                this.coreUniforms.uGravity.value = this.state.gravity;
+                this.coreUniforms.uTurbulence.value = this.state.turbulence;
+                this.coreUniforms.uDispersion.value = this.state.dispersion;
+                this.coreUniforms.uCharge.value = this.state.charge;
+                this.coreUniforms.uShockwave.value = this.state.shockwave;
+                this.coreUniforms.uOceanWave.value = this.state.oceanWave;
+                this.coreUniforms.uCursorWorld.value.copy(this.pointer.worldPos);
+
+                this.haloUniforms.uTime.value = this.state.time;
+                this.haloUniforms.uCharge.value = this.state.charge;
+                this.haloUniforms.uShockwave.value = this.state.shockwave;
+                this.haloUniforms.uDispersion.value = this.state.dispersion;
+                this.haloMesh.lookAt(this.camera.position);
+
+                this.particleUniforms.uTime.value = this.state.time;
+                this.particleUniforms.uGravity.value = this.state.gravity;
+                this.particleUniforms.uTurbulence.value = this.state.turbulence;
+                this.particleUniforms.uDispersion.value = this.state.dispersion;
+                this.particleUniforms.uCharge.value = this.state.charge;
+                this.particleUniforms.uShockwave.value = this.state.shockwave;
+                this.particleUniforms.uJetIntensity.value = this.state.jetIntensity;
+                this.particleUniforms.uOceanWave.value = this.state.oceanWave;
+                this.particleUniforms.uCursorWorld.value.copy(this.pointer.worldPos);
+
+                // 6. Update Synesthesia Web Audio & UI Readouts
+                this.audio.update(
+                    this.pointer.smoothNormY,
+                    this.state.turbulence,
+                    this.state.charge,
+                    this.state.timeScale,
+                    this.currentEpoch
+                );
+                this.drawSpectrum(this.state.time);
+                this.updateCursorAndTelemetry();
+
+                // 7. Render WebGL Frame
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+
+        // Start the installation once window loads
+        window.onload = function () {
+            const app = new AetherExperience();
+            app.animate();
+        };
+    </script>
+</body>
+</html>

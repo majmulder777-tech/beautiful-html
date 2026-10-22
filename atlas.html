@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0b0d">
+<meta name="description" content="Атлас тишины. Маленькая интерактивная вселенная, в которой можно никуда не спешить.">
+<title>Атлас тишины — свет за пределами слов</title>
+<style>
+@property --glow { syntax: '<number>'; initial-value: 0; inherits: false; }
+:root{color-scheme:dark;--paper:#ece7de;--muted:#aaa59c;--gold:#e6bc83;--line:rgba(230,220,200,.16);--bg:#0b0b0d}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg)}body{color:var(--paper);font:14px/1.5 'Segoe UI',Arial,sans-serif;overflow-x:hidden}button,input{font:inherit}button,a,input{-webkit-tap-highlight-color:transparent}button{color:inherit;cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:7px}button{border:0;background:none}a{color:inherit;text-decoration:none}::selection{background:#c39a64;color:#111}button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.3;vertical-align:middle}
+.universe{position:relative;min-height:850px;height:100svh;isolation:isolate;overflow:hidden;background:#0b0b0d}#cosmos{position:absolute;inset:0;width:100%;height:100%;z-index:-3;touch-action:pan-y}.vignette{position:absolute;inset:0;pointer-events:none;z-index:-2;background:linear-gradient(90deg,rgba(9,10,12,.5),transparent 53%),linear-gradient(0deg,#0b0b0d 0%,transparent 23%,transparent 88%,rgba(9,10,12,.3))}.grain{position:absolute;inset:0;pointer-events:none;z-index:7;opacity:.045;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.91' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath filter='url(%23n)' opacity='.8' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}.frame{position:absolute;inset:24px;border:1px solid rgba(235,224,202,.08);pointer-events:none;z-index:6}.frame:before,.frame:after{content:'+';position:absolute;font:16px monospace;color:#837461;top:-12px}.frame:before{left:-5px}.frame:after{right:-5px}
+header{height:134px;margin:0 5.8%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:24px}.brand{display:flex;align-items:center;gap:15px}.brand-symbol{width:38px;height:38px;stroke:var(--gold);fill:none;stroke-width:.8}.brand-name{font-size:12px;font-weight:500;letter-spacing:.24em;line-height:1.6;text-transform:uppercase}.brand-name span{display:block;font-size:8px;color:var(--muted);letter-spacing:.31em}.header-center{font:italic 15px Georgia,serif;color:#aaa49a}.header-right{display:flex;align-items:center;gap:30px}.edition{font-size:9px;letter-spacing:.18em;color:var(--muted)}.sound{display:flex;align-items:center;gap:10px;font-size:10px;letter-spacing:.08em;padding:10px 0}.equalizer{height:15px;display:flex;align-items:center;gap:3px}.equalizer i{display:block;width:1px;height:3px;background:var(--gold);transition:height .4s}.sound[aria-pressed=true] .equalizer i{animation:equalize 1.3s ease-in-out infinite alternate}.sound[aria-pressed=true] .equalizer i:nth-child(2){animation-delay:-.7s}.sound[aria-pressed=true] .equalizer i:nth-child(3){animation-delay:-.3s}.sound[aria-pressed=true] .equalizer i:nth-child(4){animation-delay:-1s}@keyframes equalize{from{height:3px}to{height:15px}}
+.hero{position:absolute;top:26.5%;left:8.6%;width:48%;pointer-events:none}.eyebrow{display:flex;align-items:center;gap:12px;color:var(--gold);font-size:9px;letter-spacing:.24em;text-transform:uppercase}.eyebrow:before{content:'';width:29px;height:1px;background:var(--gold)}h1{font:400 clamp(68px,7.4vw,124px)/.98 Georgia,'Times New Roman',serif;letter-spacing:-.06em;margin:32px 0 29px;text-wrap:nowrap}h1 em{font-weight:400;color:var(--gold)}.intro{max-width:290px;color:#aaa69f;font-size:12px;line-height:1.9;font-weight:300;letter-spacing:.015em}.enter{pointer-events:auto;display:inline-flex;align-items:center;gap:19px;margin-top:27px;padding:0;font-size:10px;letter-spacing:.14em;text-transform:uppercase}.enter .circle{width:44px;height:44px;border:1px solid #736550;border-radius:50%;display:grid;place-items:center;transition:background .3s,transform .3s}.enter:hover .circle{background:#d2a46c22;transform:rotate(45deg)}.enter svg{width:13px;height:13px}.annotation{position:absolute;right:8.7%;top:70.3%;display:flex;align-items:center;gap:14px;color:#aaa59c;font-size:8px;letter-spacing:.18em}.annotation:before{content:'';width:45px;height:1px;background:#635441}.annotation small{display:block;font-size:8px;letter-spacing:.1em;color:#6f6c65;margin-top:6px}.orbit-label{position:absolute;right:11.5%;top:22%;font:9px/1.8 'Courier New',monospace;letter-spacing:.13em;color:#8e8171}.orbit-label span{color:var(--gold)}
+.bottom{position:absolute;left:5.8%;right:5.8%;bottom:48px}.control-line{display:flex;justify-content:space-between;align-items:end;gap:32px;margin-bottom:32px}.coordinates{font:9px/1.8 'Courier New',monospace;letter-spacing:.08em;color:#77766e}.coordinates strong{font-weight:normal;color:#bbb3a6}.speed{width:182px}.speed label{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:#9c978d;margin-bottom:13px}.speed output{font:9px 'Courier New',monospace;color:var(--gold)}input[type=range]{appearance:none;width:100%;display:block;height:14px;background:transparent;margin:0;cursor:pointer}input[type=range]::-webkit-slider-runnable-track{height:1px;background:#70604b}input[type=range]::-moz-range-track{height:1px;background:#70604b}input[type=range]::-webkit-slider-thumb{appearance:none;height:7px;width:7px;border-radius:50%;background:var(--gold);margin-top:-3px;box-shadow:0 0 10px #d6ad7160}input[type=range]::-moz-range-thumb{height:7px;width:7px;border:0;border-radius:50%;background:var(--gold)}.scenes{display:grid;grid-template-columns:repeat(3,1fr) 110px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.scene{position:relative;text-align:left;padding:24px 26px 24px 0;display:flex;align-items:center;gap:18px;transition:opacity .3s;min-width:0}.scene:not(:first-child){padding-left:30px;border-left:1px solid var(--line)}.scene .num{font:10px 'Courier New',monospace;color:#79736b}.scene strong{display:block;font:normal 16px Georgia,serif;letter-spacing:.01em}.scene small{display:block;font-size:8px;letter-spacing:.13em;color:#87837c;margin-top:4px}.scene .dot{width:5px;height:5px;background:#766247;border-radius:50%;margin-left:auto;flex-shrink:0}.scene[aria-pressed=true] .dot{background:var(--gold);box-shadow:0 0 12px #e5bc8170}.scene:after{content:'';position:absolute;height:1px;bottom:-1px;left:0;right:100%;background:var(--gold);transition:right .5s}.scene[aria-pressed=true]:after,.scene:hover:after{right:0}.scene[aria-pressed=true] .num{color:var(--gold)}.scene:hover strong{color:var(--gold)}.snapshot{border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:10px;color:#b7afa1;font-size:9px;transition:color .3s}.snapshot:hover{color:var(--gold)}.snapshot svg{width:17px}.footer{display:flex;justify-content:space-between;gap:16px;margin-top:23px;color:#6f6d67;font-size:8px;letter-spacing:.12em}.footer em{font:italic 12px Georgia,serif;letter-spacing:0;color:#9e978b}.live{display:flex;align-items:center;gap:7px}.live:before{content:'';width:3px;height:3px;background:#a39776;border-radius:50%;box-shadow:0 0 7px #c8b27e}.toast{position:fixed;bottom:30px;left:50%;transform:translate(-50%,20px);border:1px solid #5d5142;background:#151412eF;padding:12px 22px;border-radius:3px;font-size:11px;color:#ddc8ab;z-index:20;opacity:0;transition:.3s;pointer-events:none;text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}
+.focus-exit{position:absolute;right:6%;top:47px;opacity:0;pointer-events:none;border:1px solid #7a694b80;border-radius:30px;padding:12px 20px;font-size:10px;letter-spacing:.1em;z-index:10;background:#0b0b0d66}.focus-exit span{color:#847b6e;margin-left:12px}.ui{transition:opacity 1s,transform 1s}.focused .ui{opacity:0;pointer-events:none}.focused .ui *{pointer-events:none}.focused .focus-exit{opacity:1;pointer-events:auto;transition:opacity 1s}.focused .vignette{opacity:.2;transition:opacity 1s}.focused #cosmos{cursor:crosshair}.hint{position:absolute;bottom:55px;width:100%;text-align:center;opacity:0;pointer-events:none;color:#8c8272;font:italic 15px Georgia,serif;transition:opacity 1s}.focused .hint{opacity:1}.noscript{position:absolute;top:50%;right:15%;width:25vw;height:25vw;border-radius:50%;border:3px solid #e4b785;box-shadow:0 0 70px #dd9a5a,inset 0 0 40px #da9c5a}
+@media(min-width:1700px){.hero{left:10%}.bottom{bottom:6%}header{height:150px}}
+@media(max-height:780px) and (min-width:761px){.universe{min-height:700px}.hero{top:21.5%}h1{font-size:clamp(60px,6.7vw,91px);margin-top:22px;margin-bottom:18px}.intro{font-size:11px}.enter{margin-top:18px}.bottom{bottom:36px}.control-line{margin-bottom:22px}.scene{padding-top:19px;padding-bottom:19px}header{height:105px}.annotation{top:67%}}
+@media(max-width:1000px){.header-center{display:none}.hero{left:7%}h1{font-size:9vw}.scene{gap:12px}.scene:not(:first-child){padding-left:20px}.scene strong{font-size:14px}.scene small{font-size:7px}.annotation{right:7%}.scenes{grid-template-columns:repeat(3,1fr) 70px}.snapshot span{display:none}}
+@media(max-width:760px){.universe{min-height:920px;height:100svh}.frame{inset:13px}header{height:100px;margin:0 7%}.brand-symbol{width:30px;height:30px}.brand{gap:10px}.brand-name{font-size:10px}.brand-name span{font-size:6px}.header-right{gap:0}.edition{display:none}.sound{font-size:8px}.hero{top:147px;left:9%;width:85%}.eyebrow{font-size:8px}h1{font-size:clamp(58px,12.5vw,89px);margin:24px 0 20px}.intro{font-size:11px;max-width:250px}.enter{margin-top:18px;font-size:8px;gap:13px}.enter .circle{width:35px;height:35px}.orbit-label{top:47%;left:9%;right:auto;font-size:8px}.annotation{top:auto;bottom:263px;right:9%;font-size:7px}.annotation small{font-size:7px}.annotation:before{width:24px}.bottom{left:7%;right:7%;bottom:36px}.control-line{margin-bottom:20px}.coordinates{font-size:7px}.speed{width:128px}.speed label{font-size:7px}.scenes{grid-template-columns:repeat(3,1fr);position:relative}.scene{display:block;padding:18px 8px 18px 0}.scene:not(:first-child){padding-left:14px}.scene strong{font-size:13px;margin-top:6px}.scene small{font-size:6px;letter-spacing:.06em}.scene .num{font-size:8px}.scene .dot{position:absolute;top:23px;right:14px;width:4px;height:4px}.snapshot{position:absolute;right:0;bottom:-44px;height:28px;width:32px;border:0}.footer{margin-top:20px;padding-right:45px}.footer .live{display:none}.footer em{font-size:11px}.footer>span:last-child{display:none}.focus-exit{top:36px;right:8%;font-size:9px}.hint{bottom:70px;font-size:13px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="universe" id="universe">
+<canvas id="cosmos" aria-label="Интерактивное светящееся кольцо среди звёзд. Двигайте указателем, чтобы изменить ракурс."></canvas>
+<noscript><div class="noscript"></div></noscript>
+<div class="vignette"></div><div class="grain"></div><div class="frame"></div>
+<header class="ui">
+ <a class="brand" href="#" aria-label="Атлас тишины — главная">
+  <svg class="brand-symbol" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="11"/><ellipse cx="22" cy="22" rx="21" ry="6" transform="rotate(-35 22 22)"/><path d="M22 3v7m0 24v7M3 22h7m24 0h7"/><circle cx="22" cy="22" r="2" fill="currentColor" stroke="none"/></svg>
+  <div class="brand-name">Атлас тишины<span>коллекция маленьких вселенных</span></div>
+ </a>
+ <div class="header-center">Искусство быть здесь.</div>
+ <div class="header-right"><span class="edition">ЭТЮД № 001 / ∞</span><button class="sound" id="sound" aria-pressed="false" aria-label="Включить атмосферный звук"><span class="equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span id="sound-label">Включить звук</span></button></div>
+</header>
+<section class="hero ui">
+ <div class="eyebrow">За пределами повседневного</div>
+ <h1>У тишины<br>есть <em>свет.</em></h1>
+ <p class="intro">Оставьте спешку по ту сторону экрана.<br>Здесь нет ничего, что нужно успеть.<br>Только вы, свет и немного бесконечности.</p>
+ <button class="enter" id="enter"><span class="circle"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16 16 4M4 4h12v12"/></svg></span>Раствориться в моменте</button>
+</section>
+<div class="orbit-label ui"><span>●</span> &nbsp; ОБЪЕКТ 001<br>ВООБРАЖАЕМЫЙ ГОРИЗОНТ</div>
+<div class="annotation ui"><div>СВЕТ НАХОДИТ ПУТЬ<small>даже когда всё вокруг — тишина</small></div></div>
+<section class="bottom ui" aria-label="Управление вселенной">
+ <div class="control-line"><div class="coordinates">КООРДИНАТЫ МОМЕНТА<br><strong id="moment">00 : 00 : 00</strong> &nbsp; / &nbsp; ЗДЕСЬ И СЕЙЧАС</div><div class="speed"><label for="speed">Течение времени <output id="speed-value" for="speed">1.0×</output></label><input id="speed" type="range" min="0" max="150" value="55" aria-label="Скорость движения звёзд"></div></div>
+ <div class="scenes" role="group" aria-label="Палитра вселенной">
+  <button class="scene" data-scene="0" aria-pressed="true"><span class="num">01</span><div><strong>Золотой час</strong><small>ТЕПЛО ПОСЛЕДНЕГО ЛУЧА</small></div><span class="dot"></span></button>
+  <button class="scene" data-scene="1" aria-pressed="false"><span class="num">02</span><div><strong>Синий эфир</strong><small>НА ГЛУБИНЕ ТИШИНЫ</small></div><span class="dot"></span></button>
+  <button class="scene" data-scene="2" aria-pressed="false"><span class="num">03</span><div><strong>Тихий огонь</strong><small>МЕЖДУ СНОМ И ЯВЬЮ</small></div><span class="dot"></span></button>
+  <button class="snapshot" id="snapshot" aria-label="Сохранить изображение вселенной" title="Сохранить изображение"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h4l2-3h4l2 3h4v13H4Z"/><circle cx="12" cy="13" r="4"/></svg><span>На память</span></button>
+ </div>
+ <footer class="footer"><em>Побудьте здесь. Вселенная подождёт.</em><span class="live">БЕСКОНЕЧНОСТЬ В РЕАЛЬНОМ ВРЕМЕНИ</span><span>СОЗДАНО ИЗ СВЕТА И КОДА &nbsp; ↗</span></footer>
+</section>
+<button class="focus-exit" id="exit" inert>Вернуться <span>ESC ↗</span></button><div class="hint">Вдох. Выдох. Вы уже там, где нужно.</div>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+(() => {
+ 'use strict';
+ const canvas=document.querySelector('#cosmos'),ctx=canvas.getContext('2d',{alpha:false});
+ const root=document.documentElement,universe=document.querySelector('#universe');
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ let w=0,h=0,dpr=1,t=0,last=0,speed=1,scene=0,focused=false,pointer={x:0,y:0},look={x:0,y:0},burst=0;
+ let cx=0,cy=0,r=0,field=[],dust=[],ringTexture=null;
+ const palettes=[{rgb:[237,180,111],hot:[255,236,195],accent:'#e6bc83',name:'Золотой час'},{rgb:[115,176,226],hot:[211,238,255],accent:'#9bc9e7',name:'Синий эфир'},{rgb:[218,122,112],hot:[255,211,178],accent:'#e5a196',name:'Тихий огонь'}];
+ let rgb=[...palettes[0].rgb],hot=[...palettes[0].hot];
+ let seed=771;function random(){seed=(seed*16807)%2147483647;return(seed-1)/2147483646}
+ function rgba(c,a){return `rgba(${c.map(Math.round).join(',')},${a})`}
+ function resize(){
+  w=universe.clientWidth;h=universe.clientHeight;dpr=Math.min(devicePixelRatio||1,2);
+  canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+  const mobile=w<=760;cx=w*(mobile?.61:.682);cy=h*(mobile?.552:.455);r=mobile?Math.min(w*.29,165):Math.min(w*.222,h*.32);
+  seed=771;field=Array.from({length:Math.min(1000,Math.floor(w*h/1300))},()=>({x:random()*w,y:random()*h,size:random(),a:random(),phase:random()*Math.PI*2}));
+  dust=Array.from({length:w<760?1100:2400},()=>({angle:random()*Math.PI*2,radius:1.12+Math.pow(random(),2)*1.62,z:(random()-.5),size:random(),alpha:random(),rate:.3+random()}));
+  buildRing();draw();
+ }
+ function buildRing(){
+  const s=1000,off=document.createElement('canvas');off.width=off.height=s;const c=off.getContext('2d');
+  seed=1992;
+  for(let i=0;i<1050;i++){
+   const rad=288+random()*66;const a=Math.pow(1-Math.abs(rad-307)/70,3)*(.025+random()*.06);
+   c.strokeStyle=`rgba(255,255,255,${a})`;c.lineWidth=.2+random()*1.2;c.beginPath();const start=random()*6.28;c.arc(500,500,rad,start,start+random()*5);c.stroke();
+  }
+  ringTexture=off;
+ }
+ function glow(x,y,radius,color,alpha){const g=ctx.createRadialGradient(x,y,0,x,y,radius);g.addColorStop(0,rgba(color,alpha));g.addColorStop(.35,rgba(color,alpha*.4));g.addColorStop(1,rgba(color,0));ctx.fillStyle=g;ctx.fillRect(x-radius,y-radius,radius*2,radius*2)}
+ function ellipse(rx,ry,color,width=1){ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
+ function draw(){
+  ctx.fillStyle='#0b0b0d';ctx.fillRect(0,0,w,h);
+  const x=cx+look.x*11,y=cy+look.y*8;
+  glow(x,y,r*2.75,rgb,.075);
+  glow(x+r*.5,y-r*.5,r*2,rgb,.027);
+  for(const star of field){
+   const a=(.15+star.a*.55)*(.73+.27*Math.sin(t*.15+star.phase));
+   ctx.fillStyle=rgba(star.a>.82?hot:[164,172,185],a);const sz=star.size>.97?1.3:star.size*.72+.2;
+   const sx=(star.x+look.x*(star.size*4))%w,sy=star.y+look.y*star.size*3;
+   ctx.fillRect(sx,sy,sz,sz);
+   if(star.size>.985)glow(sx,sy,4,hot,.11);
+  }
+  ctx.save();ctx.translate(x,y);
+  // Fine orbital paths belong to the composition, rather than the star field.
+  ctx.save();ctx.rotate(-.37+look.x*.018);
+  ellipse(r*1.98,r*.71,rgba(rgb,.08));ellipse(r*2.45,r*.92,rgba(rgb,.035));
+  ctx.setLineDash([2,8]);ellipse(r*1.62,r*1.54,rgba(rgb,.075));ctx.setLineDash([]);
+  ctx.restore();
+  // A broad accretion disc, partially occluded by the dark centre.
+  ctx.save();ctx.rotate(-.36+look.x*.025);ctx.globalCompositeOperation='screen';
+  for(let i=0;i<30;i++){
+   const k=i/30;ellipse(r*(1.16+k*1.05),r*(.28+k*.22),rgba(rgb,.006+Math.pow(1-k,3)*.038),r*.013);
+  }
+  for(const p of dust){
+   const a=p.angle+t*.035*p.rate/(p.radius*p.radius);const rr=r*p.radius;
+   const px=Math.cos(a)*rr,py=Math.sin(a)*rr*.25+p.z*r*.065;
+   const shine=Math.pow(Math.max(0,Math.sin(a)),2);const alpha=(.06+p.alpha*.32)*(1.35-(p.radius-1)*.35);
+   ctx.fillStyle=rgba(p.alpha>.92?hot:rgb,Math.max(0,alpha*(.5+shine)));
+   ctx.beginPath();ctx.ellipse(px,py,.3+p.size*.65,.25+p.size*.32,0,0,6.283);ctx.fill();
+  }
+  ctx.restore();
+  // Photon halo: several thin falloffs preserve the luminous, almost tactile edge.
+  const halo=ctx.createRadialGradient(0,0,r*.82,0,0,r*1.55);
+  halo.addColorStop(0,rgba(rgb,0));halo.addColorStop(.22,rgba(rgb,.012));halo.addColorStop(.3,rgba(rgb,.16));halo.addColorStop(.38,rgba(rgb,.045));halo.addColorStop(.6,rgba(rgb,.012));halo.addColorStop(1,rgba(rgb,0));
+  ctx.fillStyle=halo;ctx.fillRect(-r*1.6,-r*1.6,r*3.2,r*3.2);
+  const sphere=ctx.createRadialGradient(-r*.18,-r*.23,r*.12,0,0,r*1.02);sphere.addColorStop(0,'#090a0c');sphere.addColorStop(.78,'#08090b');sphere.addColorStop(.96,'#0b0b0d');sphere.addColorStop(1,rgba(rgb,.23));
+  ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fillStyle=sphere;ctx.fill();
+  ctx.save();ctx.globalCompositeOperation='screen';
+  for(let i=18;i>=0;i--){
+   const rr=r+i*r*.003;const g=ctx.createLinearGradient(-r,-r,r,r);
+   const a=(1-i/20)*(.13+burst*.1);g.addColorStop(0,rgba(rgb,a*.3));g.addColorStop(.3,rgba(rgb,a));g.addColorStop(.65,rgba(hot,a*1.4));g.addColorStop(1,rgba(rgb,a*.25));
+   ellipse(rr,rr,g,Math.max(.6,r*.005));
+  }
+  const edge=ctx.createLinearGradient(-r,-r,r,r);edge.addColorStop(0,rgba(rgb,.28));edge.addColorStop(.26,rgba(hot,.9));edge.addColorStop(.5,rgba(hot,.5));edge.addColorStop(.75,rgba(hot,1));edge.addColorStop(1,rgba(rgb,.25));
+  ellipse(r*1.007,r*1.007,edge,1.2);
+  // Filament texture, clipped to the narrow corona.
+  ctx.save();ctx.beginPath();ctx.arc(0,0,r*1.19,0,6.283);ctx.arc(0,0,r*.995,0,6.283,true);ctx.clip('evenodd');
+  ctx.rotate(t*.013);ctx.globalAlpha=.42;ctx.drawImage(ringTexture,-r*1.64,-r*1.64,r*3.28,r*3.28);ctx.restore();
+  glow(-r*.68,-r*.73,r*.25,hot,.25);glow(r*.6,r*.81,r*.28,rgb,.18);
+  // The near side of the disc passes in front of the event horizon.
+  ctx.save();ctx.rotate(-.36+look.x*.025);
+  const streak=ctx.createLinearGradient(-r*2,0,r*2,0);streak.addColorStop(0,rgba(rgb,0));streak.addColorStop(.24,rgba(rgb,.02));streak.addColorStop(.51,rgba(hot,.3));streak.addColorStop(.76,rgba(rgb,.09));streak.addColorStop(1,rgba(rgb,0));
+  ctx.scale(1,.24);const disc=ctx.createRadialGradient(0,0,r*.12,0,0,r*2.2);disc.addColorStop(0,rgba(rgb,0));disc.addColorStop(.45,rgba(rgb,.025));disc.addColorStop(.6,rgba(rgb,.08));disc.addColorStop(1,rgba(rgb,0));ctx.fillStyle=disc;ctx.fillRect(-r*2.3,0,r*4.6,r*2.3);
+  ctx.strokeStyle=streak;ctx.lineWidth=r*.016;ctx.beginPath();ctx.ellipse(0,0,r*1.73,r*1.03,0,0,Math.PI);ctx.stroke();ctx.restore();
+  ctx.restore();
+  // An orbiting point of light gives the still composition a sense of time.
+  const a=t*.05-1.2;const ox=Math.cos(a)*r*1.62,oy=Math.sin(a)*r*1.54;
+  glow(ox,oy,9,hot,.35);ctx.fillStyle=rgba(hot,.9);ctx.beginPath();ctx.arc(ox,oy,1.3,0,6.283);ctx.fill();
+  ctx.restore();
+ }
+ let raf;
+ function animate(now){
+  const dt=Math.min((now-last)/1000||0,.05);last=now;
+  if(!reduced)t+=dt*speed;
+  const k=1-Math.exp(-dt*3);look.x+=(pointer.x-look.x)*k;look.y+=(pointer.y-look.y)*k;
+  for(let i=0;i<3;i++){rgb[i]+=(palettes[scene].rgb[i]-rgb[i])*k;hot[i]+=(palettes[scene].hot[i]-hot[i])*k}
+  burst*=.98;draw();raf=requestAnimationFrame(animate);
+ }
+ universe.addEventListener('pointermove',e=>{const box=universe.getBoundingClientRect();pointer.x=(e.clientX-box.left)/w*2-1;pointer.y=(e.clientY-box.top)/h*2-1});
+ universe.addEventListener('pointerleave',()=>{pointer.x=0;pointer.y=0});
+ canvas.addEventListener('pointerdown',()=>{burst=1});
+ document.querySelectorAll('[data-scene]').forEach(b=>b.addEventListener('click',()=>{
+  scene=Number(b.dataset.scene);root.style.setProperty('--gold',palettes[scene].accent);
+  document.querySelectorAll('[data-scene]').forEach(el=>el.setAttribute('aria-pressed',String(el===b)));
+  if(audio)retune();
+ }));
+ document.querySelector('#speed').addEventListener('input',e=>{speed=Number(e.target.value)/55;document.querySelector('#speed-value').textContent=speed.toFixed(1)+'×'});
+ const enter=document.querySelector('#enter'),exit=document.querySelector('#exit');
+ function setFocus(value){focused=value;exit.inert=!value;universe.classList.toggle('focused',value);document.querySelectorAll('.ui').forEach(el=>{el.inert=value});if(value)exit.focus({preventScroll:true});else enter.focus({preventScroll:true})}
+ enter.addEventListener('click',()=>setFocus(true));exit.addEventListener('click',()=>setFocus(false));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&focused)setFocus(false)});
+ let audio=null,audioOn=false,master,voices=[];
+ function createAudio(){
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw new Error('Audio unavailable');audio=new AC();master=audio.createGain();master.gain.value=0;const breath=audio.createGain();breath.gain.value=.85;master.connect(breath);breath.connect(audio.destination);
+  const notes=[55,82.4069,110,164.8138,220];
+  notes.forEach((freq,i)=>{const osc=audio.createOscillator(),gain=audio.createGain(),pan=audio.createStereoPanner();osc.type='sine';osc.frequency.value=freq;osc.detune.value=(i-2)*2;gain.gain.value=i<2?.16:.045;pan.pan.value=(i%2?1:-1)*.5;osc.connect(gain);gain.connect(pan);pan.connect(master);osc.start();voices.push(osc)});
+  const lfo=audio.createOscillator(),lfoGain=audio.createGain();lfo.frequency.value=.08;lfoGain.gain.value=.04;lfo.connect(lfoGain);lfoGain.connect(breath.gain);lfo.start();
+ }
+ function retune(){const ratios=[1,1.122462,.890899];voices.forEach((osc,i)=>osc.frequency.setTargetAtTime([55,82.4069,110,164.8138,220][i]*ratios[scene],audio.currentTime,2))}
+ const sound=document.querySelector('#sound');
+ sound.addEventListener('click',async()=>{
+  try{if(!audio)createAudio();await audio.resume();audioOn=!audioOn;master.gain.cancelScheduledValues(audio.currentTime);master.gain.setTargetAtTime(audioOn?.45:0,audio.currentTime,.6);sound.setAttribute('aria-pressed',String(audioOn));sound.setAttribute('aria-label',audioOn?'Выключить атмосферный звук':'Включить атмосферный звук');document.querySelector('#sound-label').textContent=audioOn?'Звук включён':'Включить звук';if(!audioOn)setTimeout(()=>{if(!audioOn)audio.suspend()},3000)}catch{notify('Браузер не поддерживает атмосферный звук')}
+ });
+ let toastTimer;function notify(message){const el=document.querySelector('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3500)}
+ document.querySelector('#snapshot').addEventListener('click',()=>{
+  draw();const out=document.createElement('canvas');out.width=canvas.width;out.height=canvas.height;const c=out.getContext('2d');c.drawImage(canvas,0,0);c.scale(dpr,dpr);
+  c.fillStyle='#e9dfcf';c.font=`${Math.max(17,w*.018)}px Georgia`;c.fillText('Атлас тишины',w*.065,h*.09);c.fillStyle=palettes[scene].accent;c.font=`${Math.max(10,w*.008)}px sans-serif`;c.fillText(palettes[scene].name.toUpperCase()+'  /  ЭТЮД 001',w*.065,h*.09+27);c.fillStyle='#c7bfae';c.font=`italic ${Math.max(12,w*.012)}px Georgia`;c.fillText('Побудьте здесь. Вселенная подождёт.',w*.065,h*.94);
+  out.toBlob(blob=>{if(!blob){notify('Не удалось сохранить изображение');return}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='atlas-of-silence-'+(scene+1)+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);notify('Ваш маленький фрагмент бесконечности сохранён')},'image/png');
+ });
+ const started=Date.now();function tick(){let seconds=Math.floor((Date.now()-started)/1000);const hh=String(Math.floor(seconds/3600)).padStart(2,'0'),mm=String(Math.floor(seconds/60)%60).padStart(2,'0'),ss=String(seconds%60).padStart(2,'0');document.querySelector('#moment').textContent=`${hh} : ${mm} : ${ss}`};setInterval(tick,1000);tick();
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);if(audio)audio.suspend()}else{last=performance.now();raf=requestAnimationFrame(animate);if(audio&&audioOn)audio.resume()}});
+ window.addEventListener('resize',resize);resize();raf=requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
+
+

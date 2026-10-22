@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Чистая Квинта — Harmonices Mundi</title>
+  <style>
+    :root {
+      --bg: #0c0b0a;
+      --fg: #f5f2eb;
+      --muted: #9e9689;
+      --gold: #d4a853;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Georgia', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    header {
+      text-align: center;
+      max-width: 680px;
+      margin-bottom: 1.5rem;
+    }
+    .kicker {
+      font-family: monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-weight: 400;
+      font-size: 2.25rem;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    canvas {
+      width: min(78vmin, 640px);
+      height: min(78vmin, 640px);
+      border: 1px solid rgba(212, 168, 83, 0.25);
+      border-radius: 4px;
+      background: radial-gradient(circle at center, #171512 0%, #0c0b0a 100%);
+    }
+    footer {
+      margin-top: 1.25rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="kicker">HARMONICES MUNDI · АВТОНОМНАЯ ГРАВЮРА</div>
+    <h1>Чистая Квинта</h1>
+    <p>x(t) = e^(−0.0014t)·[sin(3.002t + 90°) − 0.42·cos(1.00t)]</p>
+  </header>
+  <canvas id="stage" width="1000" height="1000"></canvas>
+  <footer>Нажмите на холст, чтобы перезапустить движение маятников</footer>
+  <script>
+    const params = {"freqX":3.002,"freqY":2,"freqRot":1,"phaseX":90,"phaseY":0,"damping":0.0014,"rotAmplitude":0.42,"counterRotate":true};
+    const canvas = document.getElementById('stage');
+    const ctx = canvas.getContext('2d');
+    let animPhase = 0;
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const scale = canvas.width * 0.43;
+      ctx.beginPath();
+      const steps = 4200;
+      const dt = 0.032;
+      for (let i = 0; i <= steps; i++) {
+        const t = i * dt;
+        const env = Math.exp(-params.damping * t);
+        const px = params.phaseX * Math.PI / 180 + animPhase;
+        const py = params.phaseY * Math.PI / 180;
+        const lat = 1 - params.rotAmplitude;
+        const sign = params.counterRotate ? -1 : 1;
+        const x = (lat * Math.sin(params.freqX * t + px) + params.rotAmplitude * Math.cos(params.freqRot * t)) * env;
+        const y = (lat * Math.sin(params.freqY * t + py) + params.rotAmplitude * sign * Math.sin(params.freqRot * t)) * env;
+        if (i === 0) ctx.moveTo(cx + x * scale, cy + y * scale);
+        else ctx.lineTo(cx + x * scale, cy + y * scale);
+      }
+      ctx.strokeStyle = 'rgba(212, 168, 83, 0.72)';
+      ctx.lineWidth = 1.15;
+      ctx.stroke();
+      animPhase += 0.004;
+      requestAnimationFrame(render);
+    }
+    canvas.addEventListener('click', () => { animPhase = 0; });
+    render();
+  </script>
+</body>
+</html>

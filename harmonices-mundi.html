@@ -3,86 +3,261 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Чистая Квинта — Harmonices Mundi</title>
+  <title>Чистая Квинта — Harmonices Mundi (Автономное издание)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
+      --bg: #fbf9f5;
+      --surface: #f3efe6;
+      --fg: #1c1917;
+      --muted: #68625b;
+      --border: rgba(28, 25, 23, 0.16);
+      --accent: #9a3412;
+      --btn-bg: #1c1917;
+      --btn-fg: #fbf9f5;
+    }
+    body.dark {
       --bg: #0c0b0a;
+      --surface: #141210;
       --fg: #f5f2eb;
       --muted: #9e9689;
-      --gold: #d4a853;
+      --border: rgba(214, 206, 190, 0.16);
+      --accent: #d4a853;
+      --btn-bg: #d4a853;
+      --btn-fg: #0c0b0a;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: var(--bg);
       color: var(--fg);
-      font-family: 'Georgia', serif;
+      font-family: 'Lora', Georgia, serif;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
+      transition: background 0.2s, color 0.2s;
     }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
     header {
-      text-align: center;
-      max-width: 680px;
-      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
     }
-    .kicker {
-      font-family: monospace;
+    .nav-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .brand { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.65rem; font-weight: 600; text-decoration: none; color: var(--fg); }
+    .kicker { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    h1, h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; line-height: 1.1; }
+    h1 { font-size: clamp(2.2rem, 4vw, 3.4rem); margin-bottom: 0.75rem; }
+    h2 { font-size: 1.8rem; margin-bottom: 0.75rem; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 2rem; margin: 2rem 0 3.5rem; }
+    @media (min-width: 960px) { .grid { grid-template-columns: 7fr 5fr; } }
+    .panel { border: 1px solid var(--border); background: var(--surface); padding: 1.5rem; border-radius: 2px; }
+    canvas { width: 100%; max-width: 540px; aspect-ratio: 1/1; display: block; margin: 0 auto; border: 1px solid var(--border); cursor: grab; }
+    .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0.5rem; margin-bottom: 1.25rem; }
+    button {
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 0.75rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 0.5rem;
+      font-weight: 500;
+      padding: 0.55rem 0.9rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--fg);
+      cursor: pointer;
+      border-radius: 2px;
     }
-    h1 {
-      font-weight: 400;
-      font-size: 2.25rem;
-      letter-spacing: -0.01em;
-      margin-bottom: 0.5rem;
-    }
-    p {
-      color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
-    canvas {
-      width: min(78vmin, 640px);
-      height: min(78vmin, 640px);
-      border: 1px solid rgba(212, 168, 83, 0.25);
-      border-radius: 4px;
-      background: radial-gradient(circle at center, #171512 0%, #0c0b0a 100%);
-    }
-    footer {
-      margin-top: 1.25rem;
-      font-family: monospace;
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
+    button.primary, button.active { background: var(--btn-bg); color: var(--btn-fg); border-color: var(--btn-bg); }
+    .slider-row { margin-bottom: 0.9rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.75rem; }
+    .slider-label { display: flex; justify-content: space-between; margin-bottom: 0.3rem; }
+    .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+    input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+    footer { border-top: 1px solid var(--border); padding: 2rem 0; font-size: 0.75rem; color: var(--muted); font-family: 'Plus Jakarta Sans', sans-serif; margin-top: 3rem; }
   </style>
 </head>
-<body>
+<body class="dark">
   <header>
-    <div class="kicker">HARMONICES MUNDI · АВТОНОМНАЯ ГРАВЮРА</div>
-    <h1>Чистая Квинта</h1>
-    <p>x(t) = e^(−0.0014t)·[sin(3.002t + 90°) − 0.42·cos(1.00t)]</p>
+    <div class="container nav-row">
+      <a href="#" class="brand">Harmonices Mundi</a>
+      <div style="display:flex; gap:0.5rem; align-items:center;">
+        <button id="themeBtn">Светлая / Тёмная тема</button>
+        <button id="soundBtn" class="primary">Звучание сфер</button>
+      </div>
+    </div>
   </header>
-  <canvas id="stage" width="1000" height="1000"></canvas>
-  <footer>Нажмите на холст, чтобы перезапустить движение маятников</footer>
+
+  <main class="container" style="padding-top: 2rem;">
+    <div class="kicker">АВТОНОМНАЯ МУЗЕЙНАЯ МОНОГРАФИЯ · РОТАЦИОННЫЙ ГАРМОНИОГРАФ</div>
+    <h1 id="pageTitle">Чистая Квинта</h1>
+    <p style="color: var(--muted); max-width: 65ch; line-height: 1.65;">
+      Перетаскивайте холст курсором для смещения фазы или переключайте канонические интервалы. Этот файл полностью автономен и работает без подключения к серверу.
+    </p>
+
+    <div class="grid">
+      <div class="panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--muted); margin-bottom:0.75rem;" class="mono">
+          <span>Интерактивный стол гравировки 1:1</span>
+          <span id="eqReadout"></span>
+        </div>
+        <canvas id="stage" width="900" height="900"></canvas>
+        <div style="display:flex; gap:0.5rem; margin-top:1rem; justify-content:flex-end;">
+          <button id="pauseBtn">Пауза / Пуск</button>
+          <button id="svgBtn">Скачать SVG</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Канонические интервалы</h2>
+        <div id="presetsContainer" class="presets"></div>
+
+        <div class="slider-row">
+          <div class="slider-label"><span>Частота маятника X (ω₁)</span><span id="valFreqX" class="mono"></span></div>
+          <input id="inpFreqX" type="range" min="1" max="7" step="0.002" />
+        </div>
+        <div class="slider-row">
+          <div class="slider-label"><span>Частота маятника Y (ω₂)</span><span id="valFreqY" class="mono"></span></div>
+          <input id="inpFreqY" type="range" min="1" max="7" step="0.002" />
+        </div>
+        <div class="slider-row">
+          <div class="slider-label"><span>Ротация стола R (ω₃)</span><span id="valFreqRot" class="mono"></span></div>
+          <input id="inpFreqRot" type="range" min="0.5" max="5" step="0.05" />
+        </div>
+        <div class="slider-row">
+          <div class="slider-label"><span>Фазовый сдвиг Δφ</span><span id="valPhaseX" class="mono"></span></div>
+          <input id="inpPhaseX" type="range" min="0" max="360" step="1" />
+        </div>
+        <div class="slider-row">
+          <div class="slider-label"><span>Затухание δ</span><span id="valDamping" class="mono"></span></div>
+          <input id="inpDamping" type="range" min="0.0004" max="0.0035" step="0.0001" />
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+      <span>Harmonices Mundi · Архитектура Света, Звука и Числа</span>
+      <span class="mono">Автономная HTML-версия</span>
+    </div>
+  </footer>
+
   <script>
-    const params = {"freqX":3.002,"freqY":2,"freqRot":1,"phaseX":90,"phaseY":0,"damping":0.0014,"rotAmplitude":0.42,"counterRotate":true};
+    const presets = [{"id":"fifth","name":"Чистая Квинта","latinSubtitle":"Diapente · 2 : 3","ratioLabel":"2 : 3","description":"Совершенный консонанс пифагорейской школы. Три колебания маятника X приходятся ровно на два колебания маятника Y, рождая корону с пятью точками инверсии.","params":{"freqX":3.002,"freqY":2,"freqRot":1,"phaseX":90,"phaseY":0,"damping":0.0014,"rotAmplitude":0.42,"counterRotate":true}},{"id":"octave","name":"Октава с Розеткой","latinSubtitle":"Diapason · 1 : 2","ratioLabel":"1 : 2","description":"Фундаментальное удвоение частоты. При встречном вращении третьего маятника параболическая восьмёрка Лиссажу раскрывается в трёхлепестковую гравюру.","params":{"freqX":2.003,"freqY":1,"freqRot":1,"phaseX":45,"phaseY":90,"damping":0.0012,"rotAmplitude":0.48,"counterRotate":true}},{"id":"fourth","name":"Чистая Кварта","latinSubtitle":"Diatessaron · 3 : 4","ratioLabel":"3 : 4","description":"Геометрический диалог тройки и четвёрки. Тонкая расстройка на 0.003 Гц создаёт медленное вращение фазы и объёмный муаровый рельеф.","params":{"freqX":4.003,"freqY":3,"freqRot":2,"phaseX":60,"phaseY":0,"damping":0.0015,"rotAmplitude":0.36,"counterRotate":false}},{"id":"golden","name":"Золотая Гармония","latinSubtitle":"Sectio Aurea · φ : 1","ratioLabel":"1.618 : 1","description":"Иррациональное отношение золотого сечения φ = (1 + √5)/2. Траектория никогда не замыкается полностью, заполняя пространство квазипериодической тканью света.","params":{"freqX":1.618,"freqY":1,"freqRot":2.618,"phaseX":120,"phaseY":30,"damping":0.0011,"rotAmplitude":0.4,"counterRotate":true}},{"id":"hexad","name":"Звезда Кеплера","latinSubtitle":"Hexas Harmonica · 5 : 6","ratioLabel":"5 : 6","description":"Малая терция в сочетании с противофазной ротацией образует одиннадцатилучевую небесную мандалу, напоминающую орбитальные резонансы Венеры и Земли.","params":{"freqX":5.002,"freqY":6,"freqRot":1,"phaseX":90,"phaseY":180,"damping":0.0016,"rotAmplitude":0.45,"counterRotate":true}}];
+    let params = {"freqX":3.002,"freqY":2,"freqRot":1,"phaseX":90,"phaseY":0,"damping":0.0014,"rotAmplitude":0.42,"counterRotate":true};
+    let isPlaying = true;
+    let animPhase = 0;
+    let audioCtx = null;
+    let oscs = [];
+    let isSound = false;
+
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d');
-    let animPhase = 0;
+
+    function syncUI() {
+      document.getElementById('inpFreqX').value = params.freqX;
+      document.getElementById('valFreqX').textContent = params.freqX.toFixed(3) + ' Гц';
+      document.getElementById('inpFreqY').value = params.freqY;
+      document.getElementById('valFreqY').textContent = params.freqY.toFixed(3) + ' Гц';
+      document.getElementById('inpFreqRot').value = params.freqRot;
+      document.getElementById('valFreqRot').textContent = params.freqRot.toFixed(2) + ' Гц';
+      document.getElementById('inpPhaseX').value = params.phaseX;
+      document.getElementById('valPhaseX').textContent = Math.round(params.phaseX) + '°';
+      document.getElementById('inpDamping').value = params.damping;
+      document.getElementById('valDamping').textContent = params.damping.toFixed(4) + ' с⁻¹';
+      document.getElementById('eqReadout').textContent = params.freqX.toFixed(2) + ' : ' + params.freqY.toFixed(2);
+      if (isSound && oscs.length === 3 && audioCtx) {
+        oscs[0].frequency.setTargetAtTime(110 * params.freqY, audioCtx.currentTime, 0.08);
+        oscs[1].frequency.setTargetAtTime(110 * params.freqX, audioCtx.currentTime, 0.08);
+        oscs[2].frequency.setTargetAtTime(110 * params.freqRot, audioCtx.currentTime, 0.08);
+      }
+    }
+
+    const presetsEl = document.getElementById('presetsContainer');
+    presets.forEach((p) => {
+      const btn = document.createElement('button');
+      btn.textContent = p.name + ' (' + p.ratioLabel + ')';
+      btn.onclick = () => {
+        params = Object.assign({}, p.params);
+        document.getElementById('pageTitle').textContent = p.name;
+        syncUI();
+      };
+      presetsEl.appendChild(btn);
+    });
+
+    ['FreqX', 'FreqY', 'FreqRot', 'PhaseX', 'Damping'].forEach((key) => {
+      const prop = 'freqX' === 'freq' + key.slice(4) ? 'freqX' : key.charAt(0).toLowerCase() + key.slice(1);
+      document.getElementById('inp' + key).addEventListener('input', (e) => {
+        params[prop] = parseFloat(e.target.value);
+        syncUI();
+      });
+    });
+
+    document.getElementById('themeBtn').onclick = () => document.body.classList.toggle('dark');
+    document.getElementById('pauseBtn').onclick = () => { isPlaying = !isPlaying; };
+    document.getElementById('soundBtn').onclick = () => {
+      if (isSound) {
+        oscs.forEach(o => { try { o.stop(); } catch {} });
+        oscs = [];
+        isSound = false;
+        document.getElementById('soundBtn').textContent = 'Звучание сфер';
+        return;
+      }
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!audioCtx) audioCtx = new AC();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const master = audioCtx.createGain();
+      master.gain.value = 0.08;
+      master.connect(audioCtx.destination);
+      oscs = [110 * params.freqY, 110 * params.freqX, 110 * params.freqRot].map((f) => {
+        const o = audioCtx.createOscillator();
+        o.type = 'sine';
+        o.frequency.value = f;
+        o.connect(master);
+        o.start();
+        return o;
+      });
+      isSound = true;
+      document.getElementById('soundBtn').textContent = 'Акустика: Вкл';
+    };
+
+    document.getElementById('svgBtn').onclick = () => {
+      const pts = [];
+      for (let i = 0; i <= 2600; i++) {
+        const t = i * 0.032;
+        const env = Math.exp(-params.damping * t);
+        const px = params.phaseX * Math.PI / 180 + animPhase;
+        const py = params.phaseY * Math.PI / 180;
+        const lat = 1 - params.rotAmplitude;
+        const sign = params.counterRotate ? -1 : 1;
+        const x = 400 + ((lat * Math.sin(params.freqX * t + px) + params.rotAmplitude * Math.cos(params.freqRot * t)) * env) * 360;
+        const y = 400 + ((lat * Math.sin(params.freqY * t + py) + params.rotAmplitude * sign * Math.sin(params.freqRot * t)) * env) * 360;
+        pts.push((i === 0 ? 'M ' : 'L ') + x.toFixed(2) + ' ' + y.toFixed(2));
+      }
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><rect width="800" height="800" fill="#0c0b0a"/><path d="' + pts.join(' ') + '" fill="none" stroke="#d4a853" stroke-width="1.2"/></svg>';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+      a.download = 'harmonices-mundi.svg';
+      a.click();
+    };
+
+    let dragging = false, lastX = 0;
+    canvas.onpointerdown = (e) => { dragging = true; lastX = e.clientX; };
+    window.onpointerup = () => { dragging = false; };
+    window.onpointermove = (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - lastX;
+      lastX = e.clientX;
+      params.phaseX = (params.phaseX + dx * 0.4 + 360) % 360;
+      syncUI();
+    };
+
     function render() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2;
-      const scale = canvas.width * 0.43;
+      const dark = document.body.classList.contains('dark');
+      ctx.fillStyle = dark ? '#0e0d0b' : '#f7f3eb';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const cx = canvas.width / 2, cy = canvas.height / 2, scale = canvas.width * 0.43;
       ctx.beginPath();
-      const steps = 4200;
-      const dt = 0.032;
+      const steps = 3600, dt = 0.032;
       for (let i = 0; i <= steps; i++) {
         const t = i * dt;
         const env = Math.exp(-params.damping * t);
@@ -95,13 +270,13 @@
         if (i === 0) ctx.moveTo(cx + x * scale, cy + y * scale);
         else ctx.lineTo(cx + x * scale, cy + y * scale);
       }
-      ctx.strokeStyle = 'rgba(212, 168, 83, 0.72)';
-      ctx.lineWidth = 1.15;
+      ctx.strokeStyle = dark ? 'rgba(212, 168, 83, 0.8)' : 'rgba(28, 25, 23, 0.78)';
+      ctx.lineWidth = 1.1;
       ctx.stroke();
-      animPhase += 0.004;
+      if (isPlaying && !dragging) animPhase += 0.004;
       requestAnimationFrame(render);
     }
-    canvas.addEventListener('click', () => { animPhase = 0; });
+    syncUI();
     render();
   </script>
 </body>
